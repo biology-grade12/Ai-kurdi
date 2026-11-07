@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>یاریدەدەری خوێندن · AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js" async defer></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0b1020;--card:#131b30;--card2:#1b2540;--text:#e9edfa;--muted:#8d97b8;--primary:#6d5dfc;--primary2:#22d3ee;--ok:#22c55e;--bad:#ef4444;--border:#27314f;--r:18px}
+body{font-family:'Vazirmatn',Tahoma,sans-serif;background:radial-gradient(1200px 600px at 90% -10%,#2a1f6b 0,transparent 60%),radial-gradient(900px 500px at -10% 110%,#0d4a5a 0,transparent 60%),var(--bg);color:var(--text);min-height:100vh;line-height:1.9}
+.hidden{display:none!important}
+.muted{color:var(--muted)}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:16px;padding:12px 24px;background:rgba(11,16,32,.78);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{font-size:26px;width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2));box-shadow:0 8px 24px #6d5dfc55}
+.brand h1{font-size:17px;font-weight:800}
+.brand small{color:var(--muted)}
+.nav{display:flex;gap:6px;flex:1;overflow-x:auto;padding:4px}
+.nav-btn{white-space:nowrap;background:transparent;border:1px solid transparent;color:var(--muted);padding:8px 14px;border-radius:12px;cursor:pointer;font:inherit;font-size:14px;transition:.2s}
+.nav-btn:hover{color:var(--text);background:var(--card)}
+.nav-btn.active{color:#fff;background:linear-gradient(135deg,var(--primary),#8b5cf6);box-shadow:0 6px 18px #6d5dfc44}
+.top-actions{display:flex;gap:8px;align-items:center}
+main{max-width:1100px;margin:0 auto;padding:24px 18px 60px}
+.view{display:none}
+.view.active{display:block;animation:fade .4s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:18px;box-shadow:0 10px 30px #0006}
+.hero h2{font-size:24px;font-weight:800;margin-bottom:4px}
+.empty{text-align:center;padding:40px}
+.big{font-size:56px;margin-bottom:8px}
+.btn{font:inherit;border:0;border-radius:12px;padding:10px 18px;cursor:pointer;transition:.2s;color:var(--text);font-size:14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,var(--primary),#8b5cf6);color:#fff;box-shadow:0 6px 18px #6d5dfc44}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px)}
+.btn-ghost{background:var(--card);border:1px solid var(--border)}
+.btn-ghost:hover:not(:disabled){border-color:var(--primary)}
+.btn-apple{background:#fff;color:#000;width:100%;margin-top:10px;font-weight:600}
+.btn.sm{padding:6px 12px;font-size:13px;margin-top:8px}
+.big-btn{font-size:22px;padding:8px 22px}
+.actions{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:18px;flex-wrap:wrap}
+.actions.center{justify-content:center}
+.row{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:18px}
+select,input{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px 12px;outline:none}
+input:focus,select:focus{border-color:var(--primary)}
+label{display:flex;flex-direction:column;gap:6px;margin:12px 0;font-size:14px;color:var(--muted)}
+a{color:var(--primary2)}
+.dropzone{border:2px dashed #3a4a7a;border-radius:var(--r);padding:36px;text-align:center;cursor:pointer;transition:.2s;background:#0f1628aa}
+.dropzone:hover,.dropzone.drag{border-color:var(--primary2);background:#0f1f3a}
+.dz-icon{font-size:42px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-top:16px}
+.thumb{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--border);aspect-ratio:3/4;background:#000}
+.thumb img{width:100%;height:100%;object-fit:cover;cursor:zoom-in}
+.thumb .badge{position:absolute;bottom:6px;right:6px;background:#000a;padding:2px 9px;border-radius:99px;font-size:12px}
+.thumb-del{position:absolute;top:6px;left:6px;background:#ef4444;border:0;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer}
+.bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden;margin:12px 0 18px}
+.bar div{height:100%;width:0;background:linear-gradient(90deg,var(--primary),var(--primary2));transition:width .4s}
+.quiz-head{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px;flex-wrap:wrap;gap:8px}
+.pill{background:#ffffff14;border:1px solid var(--border);padding:4px 12px;border-radius:99px;font-size:13px}
+.question{font-size:20px;font-weight:700;line-height:2;margin-bottom:12px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:center;text-align:right;width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:14px 16px;border-radius:14px;cursor:pointer;font:inherit;font-size:15px;transition:.2s}
+.opt:hover:not(:disabled){border-color:var(--primary);transform:translateX(-3px)}
+.opt .letter{min-width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--card2);font-weight:700;font-size:13px;flex:none}
+.opt.correct{border-color:var(--ok);background:#22c55e22}
+.opt.correct .letter{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--bad);background:#ef444422}
+.opt.wrong .letter{background:var(--bad);color:#fff}
+.opt.selected{border-color:var(--primary2);background:#22d3ee15}
+.feedback{margin-top:16px;padding:16px 18px;border-radius:14px;border:1px solid;line-height:2}
+.feedback p{margin-top:6px}
+.feedback.good{background:#22c55e15;border-color:#22c55e66}
+.feedback.bad{background:#ef444415;border-color:#ef444466}
+.stage{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;align-items:center}
+.stage-img{position:relative;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:4/3;border:1px solid var(--border)}
+.stage-img img{width:100%;height:100%;object-fit:contain;display:block}
+.noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center;padding:10px}
+.stage-text h2{font-size:24px;margin:10px 0}
+.stage-text ul{padding-right:20px;display:grid;gap:8px}
+#vScene.anim .stage-text{animation:slideIn .6s ease}
+#vScene.anim .stage-img{animation:zoom .8s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+@keyframes zoom{from{transform:scale(1.03);opacity:.6}to{transform:none;opacity:1}}
+.subtitle{margin-top:18px;background:#0008;border-radius:14px;padding:16px 20px;min-height:76px;font-size:17px;line-height:2;border:1px solid var(--border)}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.result-top{display:flex;gap:20px;align-items:center;margin-bottom:12px}
+.ring{width:110px;height:110px;border-radius:50%;background:conic-gradient(var(--primary) calc(var(--p,0)*1%),var(--border) 0);display:grid;place-items:center;flex:none;position:relative}
+.ring::before{content:'';position:absolute;inset:10px;border-radius:50%;background:var(--card)}
+.ring span{position:relative;font-weight:800;font-size:22px}
+.section-title{margin:26px 0 12px}
+.rev{border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;background:var(--bg)}
+.rev.good{border-right:4px solid var(--ok)}
+.rev.bad{border-right:4px solid var(--bad)}
+.rev-q{font-weight:700;margin-bottom:4px}
+.why{color:#fde68a;margin-top:4px}
+.hist{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:14px;margin-bottom:10px;background:var(--bg)}
+.hist-score{font-size:20px;font-weight:800;color:var(--primary2)}
+.modal{position:fixed;inset:0;background:#000b;display:grid;place-items:center;z-index:100;padding:16px;backdrop-filter:blur(4px)}
+.modal-box{position:relative;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:28px;width:100%;max-width:460px;animation:fade .3s}
+.modal-box.sm{text-align:center}
+.modal-box.wide{max-width:900px}
+.modal-box .x{position:absolute;top:12px;left:12px;background:none;border:0;color:var(--muted);font-size:20px;cursor:pointer}
+.modal-box h2{margin-bottom:10px}
+.modal-box label input{width:100%}
+.gbtn{display:flex;justify-content:center;margin:18px 0 4px;min-height:44px}
+.page-img{width:100%;border-radius:14px;border:1px solid var(--border)}
+.loader{position:fixed;inset:0;background:#070b18dd;display:grid;place-items:center;z-index:200;text-align:center}
+.spinner{width:56px;height:56px;border:5px solid var(--border);border-top-color:var(--primary2);border-radius:50%;margin:0 auto 14px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:300;display:grid;gap:8px;width:min(92vw,420px)}
+.toast{background:var(--card2);border:1px solid var(--border);padding:12px 16px;border-radius:12px;box-shadow:0 10px 30px #0008;animation:fade .3s}
+.toast.ok{border-color:var(--ok)}
+.toast.error{border-color:var(--bad)}
+.toast.out{opacity:0;transition:.4s}
+@media(max-width:760px){.stage{grid-template-columns:1fr}.brand small{display:none}.hero h2{font-size:20px}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">🧠</div>
+    <div><h1>یاریدەدەری خوێندن</h1><small>AI · کوردی</small></div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" data-view="home">🏠 سەرەکی</button>
+    <button class="nav-btn" data-view="quiz">📝 کویز</button>
+    <button class="nav-btn" data-view="exam">🎯 تێست</button>
+    <button class="nav-btn" data-view="video">🎬 شەرحی ڤیدیۆ</button>
+    <button class="nav-btn" data-view="history">📊 مێژوو</button>
+  </nav>
+  <div class="top-actions">
+    <button class="btn btn-ghost" id="btnSettings" title="ڕێکخستنەکان">⚙️</button>
+    <button class="btn btn-ghost" id="btnUser">چوونەژوورەوە</button>
+  </div>
+</header>
+
+<main>
+  <!-- ================= HOME ================= -->
+  <section id="view-home" class="view active">
+    <div class="card hero">
+      <h2>وێنەی لاپەڕەکانی دەرسەکەت بار بکە</h2>
+      <p class="muted">AI دەیخوێنێتەوە و کویز، تێستی کۆتایی و شەرحی ڤیدیۆیی بۆ دروست دەکات.</p>
+    </div>
+    <div class="card">
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+        <div class="dz-icon">📚</div>
+        <p><b>کلیک بکە</b> یان وێنەکان ڕابکێشە بۆ ئێرە</p>
+        <small class="muted">JPG / PNG · هەتا چەند لاپەڕەیەک</small>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+      <div class="row">
+        <label style="margin:0">ژمارەی پرسیارەکان
+          <select id="qCount">
+            <option value="10">١٠ پرسیار</option>
+            <option value="15">١٥ پرسیار</option>
+            <option value="20" selected>٢٠ پرسیار</option>
+            <option value="30">٣٠ پرسیار</option>
+          </select>
+        </label>
+        <button class="btn btn-primary" id="btnGenerate">✨ دروستکردنی کویز و شەرح</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= QUIZ ================= -->
+  <section id="view-quiz" class="view">
+    <div class="card empty" id="quizEmpty">
+      <div class="big">📭</div>
+      <p>هێشتا کویزێک نییە. سەرەتا وێنەی لاپەڕەکان ئەپلۆد بکە.</p>
+      <button class="btn btn-primary" data-goto="home">بڕۆ بۆ ئەپلۆد</button>
+    </div>
+    <div class="card" id="quizBox">
+      <div class="quiz-head"><span id="qProgress"></span><span class="pill" id="qScore"></span></div>
+      <div class="bar"><div id="qBar"></div></div>
+      <h3 class="question" id="qText"></h3>
+      <div class="opts" id="qOpts"></div>
+      <div class="feedback hidden" id="qFeedback"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="qPage" hidden></button>
+        <button class="btn btn-primary" id="qNext" disabled></button>
+      </div>
+    </div>
+    <div class="card hidden" id="quizDone">
+      <div class="big">🏁</div>
+      <h2>کویزەکە تەواو بوو</h2>
+      <p id="qDoneText" class="muted"></p>
+      <div class="actions center">
+        <button class="btn btn-ghost" id="qRestart">🔁 دووبارە</button>
+        <button class="btn btn-primary" data-goto="exam">🎯 تێستی کۆتایی</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EXAM ================= -->
+  <section id="view-exam" class="view">
+    <div class="card" id="examIntro">
+      <div class="big">🎯</div>
+      <h2>تێستی کۆتایی</h2>
+      <p class="muted">تێست لە ١٥ پرسیاری هەڕەمەکی پێکدێت. بۆ هەر پرسیارێک ٤٥ چرکە هەیە. دوای کۆتایی، وەڵامەکانت و ڕوونکردنەوەی هەڵەکان دەبینیت.</p>
+      <div class="actions center"><button class="btn btn-primary big-btn" id="exStart">▶️ دەستپێکردن</button></div>
+    </div>
+    <div class="card hidden" id="examRun">
+      <div class="quiz-head"><span id="exProgress"></span><span class="pill" id="examTimer">⏱ 00:00</span></div>
+      <div class="bar"><div id="exBar"></div></div>
+      <h3 class="question" id="exText"></h3>
+      <div class="opts" id="exOpts"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="exPrev">→ پێشوو</button>
+        <button class="btn btn-primary" id="exNext">← داهاتوو</button>
+      </div>
+    </div>
+    <div class="card hidden" id="examResult">
+      <div class="result-top">
+        <div class="ring" id="exRing"><span id="exPct"></span></div>
+        <div><h2 id="exScore"></h2><p id="exMsg" class="muted"></p></div>
+      </div>
+      <div class="actions center">
+        <button class="btn btn-ghost" id="exAgain">🔁 تێستی نوێ</button>
+        <button class="btn btn-ghost" data-goto="quiz">📝 گەڕانەوە بۆ کویز</button>
+      </div>
+      <h3 class="section-title">پێداچوونەوەی وەڵامەکان</h3>
+      <div id="exReview"></div>
+    </div>
+  </section>
+
+  <!-- ================= VIDEO ================= -->
+  <section id="view-video" class="view">
+    <div class="card empty" id="videoEmpty">
+      <div class="big">🎬</div>
+      <p>هێشتا شەرحی ڤیدیۆ نییە. لە لاپەڕەی سەرەکی دروستی بکە.</p>
+      <button class="btn btn-primary" data-goto="home">بڕۆ بۆ ئەپلۆد</button>
+    </div>
+    <div class="card hidden" id="videoPlayer">
+      <div class="stage" id="vScene">
+        <div class="stage-img">
+          <img id="vImg" alt="">
+          <div id="vNoImg" class="noimg">وێنەی ئەم لاپەڕەیە لە بیرگەی ئەم گەڕانەوەیەدا نییە</div>
+        </div>
+        <div class="stage-text">
+          <span class="pill" id="vPageTag"></span>
+          <h2 id="vTitle"></h2>
+          <ul id="vPoints"></ul>
+        </div>
+      </div>
+      <div class="subtitle" id="vNarr"></div>
+      <div class="bar"><div id="vBar"></div></div>
+      <div class="controls">
+        <button class="btn btn-ghost" id="vPrev">⏮</button>
+        <button class="btn btn-primary big-btn" id="vPlay">▶️</button>
+        <button class="btn btn-ghost" id="vNext">⏭</button>
+        <span id="vCounter" class="muted"></span>
+        <select id="vRate">
+          <option value="0.8">0.8×</option>
+          <option value="1" selected>1×</option>
+          <option value="1.25">1.25×</option>
+        </select>
+        <button class="btn btn-ghost" id="vRegen">🔄 دروستکردنەوە</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HISTORY ================= -->
+  <section id="view-history" class="view">
+    <div class="card">
+      <h2 style="margin-bottom:14px">📊 مێژووی ئەنجامەکان</h2>
+      <div id="historyList"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div class="modal hidden" id="settingsModal">
+  <div class="modal-box">
+    <button class="x" data-close="settingsModal">✕</button>
+    <h2>⚙️ ڕێکخستنەکان</h2>
+    <label>کلیلی API ی Gemini
+      <input id="setKey" type="password" placeholder="AIza...">
+    </label>
+    <small class="muted">کلیلەکە تەنها لەسەر ئەم کۆمپیوتەرە پاشەکەوت دەبێت. لە
+      <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>
+      بە خۆڕایی وەریبگرە.</small>
+    <label>ناوی مۆدێل
+      <input id="setModel" placeholder="gemini-2.0-flash">
+    </label>
+    <div class="actions"><button class="btn btn-primary" id="btnSaveSettings">پاشەکەوتکردن</button></div>
+  </div>
+</div>
+
+<!-- ================= LOGIN MODAL ================= -->
+<div class="modal hidden" id="loginModal">
+  <div class="modal-box sm">
+    <button class="x" data-close="loginModal">✕</button>
+    <div class="big">🔐</div>
+    <h2 id="loginTitle">چوونەژوورەوە</h2>
+    <p class="muted">بۆ پاشەکەوتکردنی ئەنجام و مێژووی خوێندنت، یەکێک لەمانە هەڵبژێرە:</p>
+    <div id="gBtn" class="gbtn"></div>
+    <button class="btn btn-apple" id="aBtn">🍎 چوونەژوورەوە بە Apple</button>
+    <button class="btn btn-ghost" style="margin-top:12px;width:100%" data-close="loginModal">دواتر</button>
+  </div>
+</div>
+
+<!-- ================= PAGE VIEWER ================= -->
+<div class="modal hidden" id="pageModal">
+  <div class="modal-box wide">
+    <button class="x" data-close="pageModal">✕</button>
+    <h3 id="pageNum" style="margin-bottom:10px"></h3>
+    <img id="pageImg" class="page-img" alt="">
+  </div>
+</div>
+
+<div class="loader hidden" id="loader">
+  <div>
+    <div class="spinner"></div>
+    <p id="loaderText"></p>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* =========================================================
+   ڕێکخستنی سەرەکی — ئەمانە بگۆڕە
+   ========================================================= */
+const CONFIG = {
+  GOOGLE_CLIENT_ID: "",   // ئایدی کلاینتی گوگل (OAuth Web Client ID)
+  APPLE_CLIENT_ID: "",    // Services ID ی ئەپل
+  APPLE_REDIRECT_URI: location.origin + location.pathname,
+  DEFAULT_MODEL: "gemini-2.0-flash"
+};
+
+/* ---------- Helpers ---------- */
+const $  = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; } return a; };
+const hasTTS = 'speechSynthesis' in window;
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { localStorage.setItem(k, JSON.stringify(v)); }
+};
+
+function toast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.classList.add('out'), 3000);
+  setTimeout(() => t.remove(), 3400);
+}
+function loading(on, text = '') { $('#loader').classList.toggle('hidden', !on); $('#loaderText').textContent = text; }
+function openModal(id) { $('#' + id).classList.remove('hidden'); }
+function closeModal(id) { $('#' + id).classList.add('hidden'); }
+
+/* ---------- State ---------- */
+const state = {
+  user: store.get('ai_user', null),
+  settings: Object.assign({ apiKey: '', model: CONFIG.DEFAULT_MODEL }, store.get('ai_settings', {})),
+  pages: [],                                   // {name,url,b64} — لە بیرگەی کاتی
+  questions: store.get('ai_questions', []),    // پاشەکەوت دەکرێن
+  lessons: store.get('ai_lessons', []),
+  quiz: { idx: 0, score: 0, answered: false },
+  exam: { phase: 'intro', list: [], idx: 0, answers: [], timer: null, left: 0 },
+  video: { slides: [], idx: 0, playing: false, timeout: null, token: 0, rate: 1 }
+};
+
+/* ---------- Views ---------- */
+function showView(name) {
+  $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + name));
+  $$('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  if (name === 'quiz') renderQuiz();
+  if (name === 'exam') renderExam();
+  if (name === 'video') renderVideoView();
+  if (name === 'history') renderHistory();
+}
+
+/* ---------- Upload ---------- */
+const dz = $('#dropzone'), fi = $('#fileInput');
+dz.onclick = () => fi.click();
+['dragenter', 'dragover'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.add('drag'); }));
+['dragleave', 'drop'].forEach(e => dz.addEventListener(e, ev => { ev.preventDefault(); dz.classList.remove('drag'); }));
+dz.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+fi.onchange = () => { addFiles(fi.files); fi.value = ''; };
+
+function fileToPage(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const max = 1600;
+      let w = img.width, h = img.height;
+      const s = Math.min(1, max / Math.max(w, h));
+      w = Math.round(w * s); h = Math.round(h * s);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = c.toDataURL('image/jpeg', 0.85);
+      URL.revokeObjectURL(url);
+      resolve({ name: file.name, url: dataUrl, b64: dataUrl.split(',')[1] });
+    };
+    img.onerror = () => reject(new Error('نەتوانرا وێنەکە بخوێنرێتەوە: ' + file.name));
+    img.src = url;
+  });
+}
+
+async function addFiles(files) {
+  const imgs = [...files].filter(f => f.type.startsWith('image/'));
+  if (!imgs.length) return toast('تەنها وێنە هەڵبژێرە', 'error');
+  loading(true, 'وێنەکان ئامادە دەکرێن...');
+  try {
+    for (const f of imgs) state.pages.push(await fileToPage(f));
+    renderThumbs();
+    toast(`${imgs.length} وێنە زیادکرا ✔`, 'ok');
+  } catch (err) { toast(err.message, 'error'); }
+  loading(false);
+}
+
+function renderThumbs() {
+  $('#thumbs').innerHTML = state.pages.map((p, i) => `
+    <div class="thumb">
+      <img src="${p.url}" alt="" data-open="${i + 1}">
+      <span class="badge">${i + 1}</span>
+      <button class="thumb-del" data-i="${i}" title="سڕینەوە">✕</button>
+    </div>`).join('');
+  $$('#thumbs [data-open]').forEach(im => im.onclick = () => openPage(+im.dataset.open));
+  $$('.thumb-del').forEach(b => b.onclick = () => { state.pages.splice(+b.dataset.i, 1); renderThumbs(); });
+}
+
+/* ---------- Gemini (AI) ---------- */
+function parseJSON(t) {
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  return JSON.parse(t.slice(a, b + 1));
+}
+
+async function callGemini(parts) {
+  const { apiKey, model } = state.settings;
+  if (!apiKey) throw new Error('کلیلی API دانەنراوە. لە ڕێکخستنەکان دایبنێ.');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const body = {
+    contents: [{ role: 'user', parts }],
+    generationConfig: { temperature: 0.4, maxOutputTokens: 8192, responseMimeType: 'application/json' }
+  };
+  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'هەڵە لە پەیوەندی بە AI');
+  const text = data.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+  if (!text) throw new Error('AI وەڵامی نەدایەوە');
+  return parseJSON(text);
+}
+
+const imageParts = () => state.pages.map(p => ({ inline_data: { mime_type: 'image/jpeg', data: p.b64 } }));
+
+function quizPrompt(n) {
+  return `تۆ مامۆستایەکی پسپۆڕی و دروستکەری تاقیکردنەوەیت.
+ئەم وێنانە لاپەڕەکانی دەرسێکن. ژمارەی لاپەڕە بەپێی ڕیزبەندی وێنەکانە (یەکەم وێنە = لاپەڕەی 1).
+تەنها لەسەر بنەمای ئەو زانیارییانەی لە وێنەکاندا هەن، دەقیقاً ${n} پرسیاری فرە‌هەڵبژاردە دروست بکە:
+- هەموو پرسیارەکان، هەڵبژاردەکان و ڕوونکردنەوەکان بە زمانی کوردیی سۆرانی بن.
+- هەر پرسیارێک ٤ هەڵبژاردەی هەبێت و تەنها یەکێکیان ڕاست بێت.
+- ئاستی پرسیارەکان جیاواز بێت (ئاسان، ناوەند، قورس) و بەسەر هەموو لاپەڕەکاندا دابەش بکرێن.
+- "answer" ژمارەی ئیندێکسی هەڵبژاردەی ڕاستە (0 بۆ یەکەم، 1 بۆ دووەم، 2 بۆ سێیەم، 3 بۆ چوارەم).
+- "why" ڕوونکردنەوەیەکی کورت و ڕوون بدە بۆچی ئەو وەڵامە ڕاستە.
+- "page" ژمارەی ئەو لاپەڕەیە کە زانیاری ئەو پرسیارەی تێدایە.
+تەنها JSON ی خاوێن وەڵام بدەوە، بەبێ هیچ دەقی زیادە، بەم شێوەیە:
+{"questions":[{"q":"...","options":["...","...","...","..."],"answer":0,"why":"...","page":1}]}`;
+}
+
+const LESSON_PROMPT = `تۆ مامۆستایەکی شارەزایت کە دەرس بە شێوەی ڤیدیۆ شەرح دەکات.
+ئەم وێنانە لاپەڕەکانی دەرسن (یەکەم وێنە = لاپەڕەی 1).
+بۆ هەر لاپەڕەیەک شەرحێکی تێر و تەسەل و ڕوون بە کوردیی سۆرانی دروست بکە بە شێوەی سلاید:
+- هەر لاپەڕەیەک ٣ بۆ ٦ سلایدی هەبێت.
+- "title": ناونیشانی کورتی سلایدەکە.
+- "points": ٢ بۆ ٤ خاڵی کورت.
+- "narration": دەقی گوتن بە ٢ بۆ ٤ ڕستە، وەک مامۆستایەک کە بە زمانێکی ساکار و ڕوون قسە دەکات.
+- هیچ زانیاریەکی هەڵە یان زیادە مەخەرە؛ تەنها لەسەر ناوەڕۆکی وێنەکان بڕۆ.
+تەنها JSON وەڵام بدەوە بەم شێوەیە:
+{"pages":[{"page":1,"title":"ناونیشانی لاپەڕە","slides":[{"title":"...","points":["..."],"narration":"..."}]}]}`;
+
+async function makeQuestions(n) {
+  const data = await callGemini([...imageParts(), { text: quizPrompt(n) }]);
+  const list = (data.questions || []).filter(q => q.q && Array.isArray(q.options) && q.options.length >= 2);
+  if (!list.length) throw new Error('AI هیچ پرسیارێکی دروست نەکرد');
+  return list.map(q => {
+    const items = q.options.map((t, i) => ({ t, ok: i === Number(q.answer) }));
+    shuffle(items); // هەڵبژاردەکان تێکەڵ دەکرێن
+    return { q: q.q, options: items.map(x => x.t), answer: items.findIndex(x => x.ok), why: q.why || '', page: Number(q.page) || 1 };
+  });
+}
+
+async function makeLessons() {
+  const data = await callGemini([...imageParts(), { text: LESSON_PROMPT }]);
+  return (data.pages || []).map(p => ({
+    page: Number(p.page) || 1,
+    title: p.title || '',
+    slides: (p.slides || []).map(s => ({ title: s.title || '', points: s.points || [], narration: s.narration || '' }))
+  }));
+}
+
+async function generateAll() {
+  if (!state.pages.length) return toast('سەرەتا وێنەی لاپەڕەکان ئەپلۆد بکە', 'error');
+  if (!state.settings.apiKey) { openSettings(); return toast('یەکەم جار کلیلی API دابنێ', 'error'); }
+  const n = +$('#qCount').value;
+  loading(true, 'AI خەریکی خوێندنەوەی لاپەڕەکانە و کویز دروست دەکات...');
+  const [qRes, lRes] = await Promise.allSettled([makeQuestions(n), makeLessons()]);
+  loading(false);
+
+  if (qRes.status === 'fulfilled') {
+    state.questions = qRes.value;
+    store.set('ai_questions', state.questions);
+    state.quiz = { idx: 0, score: 0, answered: false };
+    toast(`${state.questions.length} پرسیار ئامادەیە ✔`, 'ok');
+  } else toast('کێشە لە کویز: ' + qRes.reason.message, 'error');
+
+  if (lRes.status === 'fulfilled') {
+    state.lessons = lRes.value;
+    store.set('ai_lessons', state.lessons);
+    resetVideo();
+    toast('شەرحی ڤیدیۆ ئامادەیە ✔', 'ok');
+  } else toast('کێشە لە شەرح: ' + lRes.reason.message, 'error');
+
+  if (qRes.status === 'fulfilled') showView('quiz');
+}
+$('#btnGenerate').onclick = generateAll;
+
+/* ---------- Quiz ---------- */
+function renderQuiz() {
+  const total = state.questions.length;
+  $('#quizEmpty').classList.toggle('hidden', total > 0);
+  if (!total) { $('#quizBox').classList.add('hidden'); $('#quizDone').classList.add('hidden'); return; }
+  if (state.quiz.idx >= total) { showQuizDone(); return; }
+
+  $('#quizDone').classList.add('hidden');
+  $('#quizBox').classList.remove('hidden');
+  const q = state.questions[state.quiz.idx];
+  $('#qProgress').textContent = `پرسیار ${state.quiz.idx + 1} لە ${total}`;
+  $('#qScore').textContent = `✅ ${state.quiz.score}`;
+  $('#qBar').style.width = `${(state.quiz.idx / total) * 100}%`;
+  $('#qText').textContent = q.q;
+  $('#qOpts').innerHTML = q.options.map((o, i) =>
+    `<button class="opt" data-i="${i}"><span class="letter">${'ABCD'[i]}</span><span>${esc(o)}</span></button>`).join('');
+  $$('#qOpts .opt').forEach(b => b.onclick = () => answerQuiz(+b.dataset.i));
+  $('#qFeedback').classList.add('hidden');
+  $('#qPage').hidden = true;
+  $('#qNext').disabled = true;
+  $('#qNext').textContent = state.quiz.idx + 1 < total ? '← پرسیاری داهاتوو' : '🏁 کۆتایی';
+  state.quiz.answered = false;
+}
+
+function answerQuiz(i) {
+  if (state.quiz.answered) return;
+  state.quiz.answered = true;
+  const q = state.questions[state.quiz.idx];
+  const ok = i === q.answer;
+  if (ok) state.quiz.score++;
+
+  $$('#qOpts .opt').forEach((b, k) => {
+    b.disabled = true;
+    if (k === q.answer) b.classList.add('correct');
+    else if (k === i) b.classList.add('wrong');
+  });
+
+  const fb = $('#qFeedback');
+  fb.classList.remove('hidden');
+  fb.className = `feedback ${ok ? 'good' : 'bad'}`;
+  fb.innerHTML = ok
+    ? `<b>🎉 آفەرین! وەڵامەکەت ڕاستە.</b><p>${esc(q.why)}</p>`
+    : `<b>❌ هەڵە بوو.</b><p>وەڵامی ڕاست: <b>${esc(q.options[q.answer])}</b></p><p><b>بۆچی؟</b> ${esc(q.why)}</p>`;
+
+  $('#qScore').textContent = `✅ ${state.quiz.score}`;
+  $('#qNext').disabled = false;
+  const pb = $('#qPage');
+  pb.hidden = false;
+  pb.textContent = `🖼 بینینی لاپەڕەی ${q.page}`;
+  pb.onclick = () => openPage(q.page);
+}
+
+$('#qNext').onclick = () => {
+  state.quiz.idx++;
+  if (state.quiz.idx >= state.questions.length) {
+    addHistory({ type: 'کویز', score: state.quiz.score, total: state.questions.length, date: new Date().toISOString() });
+  }
+  renderQuiz();
+};
+
+function showQuizDone() {
+  const { score } = state.quiz, total = state.questions.length;
+  $('#quizBox').classList.add('hidden');
+  $('#quizDone').classList.remove('hidden');
+  $('#qDoneText').textContent = `ئەنجامەکەت: ${score} لە ${total} (${Math.round(score / total * 100)}%)`;
+}
+$('#qRestart').onclick = () => { state.quiz = { idx: 0, score: 0, answered: false }; renderQuiz(); };
+
+/* ---------- Exam ---------- */
+const SECONDS_PER_Q = 45;
+
+function renderExam() {
+  const ph = state.exam.phase;
+  $('#examIntro').classList.toggle('hidden', ph !== 'intro');
+  $('#examRun').classList.toggle('hidden', ph !== 'run');
+  $('#examResult').classList.toggle('hidden', ph !== 'result');
+}
+
+function startExam() {
+  if (state.questions.length < 3) return toast('سەرەتا کویز دروست بکە (لانیکەم ٣ پرسیار)', 'error');
+  const e = state.exam;
+  clearInterval(e.timer);
+  const count = Math.min(15, state.questions.length);
+  Object.assign(e, {
+    phase: 'run',
+    list: shuffle([...state.questions]).slice(0, count),
+    idx: 0,
+    answers: Array(count).fill(-1),
+    left: count * SECONDS_PER_Q
+  });
+  renderExam();
+  renderExamQ();
+  updateTimerUI();
+  e.timer = setInterval(() => {
+    e.left--;
+    updateTimerUI();
+    if (e.left <= 0) finishExam(true);
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const s = Math.max(0, state.exam.left);
+  const m = String(Math.floor(s / 60)).padStart(2, '0'), sec = String(s % 60).padStart(2, '0');
+  $('#examTimer').textContent = `⏱ ${m}:${sec}`;
+}
+
+function renderExamQ() {
+  const e = state.exam, q = e.list[e.idx], total = e.list.length;
+  $('#exProgress').textContent = `پرسیار ${e.idx + 1} لە ${total}`;
+  $('#exBar').style.width = `${((e.idx + 1) / total) * 100}%`;
+  $('#exText').textContent = q.q;
+  $('#exOpts').innerHTML = q.options.map((o, i) =>
+    `<button class="opt ${e.answers[e.idx] === i ? 'selected' : ''}" data-i="${i}"><span class="letter">${'ABCD'[i]}</span><span>${esc(o)}</span></button>`).join('');
+  $$('#exOpts .opt').forEach(b => b.onclick = () => { e.answers[e.idx] = +b.dataset.i; renderExamQ(); });
+  $('#exPrev').disabled = e.idx === 0;
+  $('#exNext').textContent = e.idx === total - 1 ? '🏁 ناردنی تێست' : '← داهاتوو';
+}
+
+$('#exPrev').onclick = () => { if (state.exam.idx > 0) { state.exam.idx--; renderExamQ(); } };
+$('#exNext').onclick = () => {
+  const e = state.exam;
+  if (e.idx < e.list.length - 1) { e.idx++; renderExamQ(); return; }
+  if (e.answers[e.idx] < 0 && !confirm('وەڵامی ئەم پرسیارە نەدراوەتەوە. بەردەوام بیت؟')) return;
+  finishExam(false);
+};
+
+function finishExam(timeout) {
+  const e = state.exam;
+  if (e.phase !== 'run') return;
+  clearInterval(e.timer);
+  e.phase = 'result';
+  if (timeout) toast('کاتەکە تەواو بوو!', 'error');
+
+  const total = e.list.length;
+  let score = 0;
+  const review = e.list.map((q, i) => {
+    const ok = e.answers[i] === q.answer;
+    if (ok) score++;
+    return { q, ua: e.answers[i], ok };
+  });
+  const pct = Math.round(score / total * 100);
+
+  addHistory({ type: 'تێست', score, total, date: new Date().toISOString() });
+  renderExam();
+  $('#exScore').textContent = `${score} / ${total}`;
+  $('#exPct').textContent = `${pct}%`;
+  $('#exRing').style.setProperty('--p', pct);
+  $('#exMsg').textContent = pct >= 85 ? 'زۆر باشە! 🌟' : pct >= 60 ? 'باشە، بەڵام دووبارە بخوێنەوە 📖' : 'پێویستت بە خوێندنەوەی زیاترە 💪';
+  $('#exReview').innerHTML = review.map((r, k) => `
+    <div class="rev ${r.ok ? 'good' : 'bad'}">
+      <div class="rev-q">${k + 1}. ${esc(r.q.q)}</div>
+      <div>وەڵامی تۆ: <b>${r.ua < 0 ? 'وەڵامت نەدایەوە' : esc(r.q.options[r.ua])}</b></div>
+      ${r.ok ? '' : `<div>وەڵامی ڕاست: <b>${esc(r.q.options[r.q.answer])}</b></div>`}
+      <div class="why">💡 ${esc(r.q.why)}</div>
+      <button class="btn btn-ghost sm" data-page="${r.q.page}">🖼 لاپەڕەی ${r.q.page}</button>
+    </div>`).join('');
+  $$('#exReview [data-page]').forEach(b => b.onclick = () => openPage(+b.dataset.page));
+
+  if (!state.user) setTimeout(() => openLogin('ئەنجامەکەت پاشەکەوت بکە'), 1200);
+}
+
+$('#exStart').onclick = startExam;
+$('#exAgain').onclick = () => { state.exam.phase = 'intro'; renderExam(); };
+
+/* ---------- Video (شەرحی ڤیدیۆ) ---------- */
+function flattenSlides() {
+  const out = [];
+  state.lessons.forEach(l => l.slides.forEach(s => out.push({
+    page: l.page, pageTitle: l.title, title: s.title, points: s.points, narration: s.narration
+  })));
+  return out;
+}
+
+function resetVideo() {
+  stopVideo();
+  state.video.slides = [];
+  state.video.idx = 0;
+}
+
+function renderVideoView() {
+  const has = state.lessons.some(l => l.slides && l.slides.length);
+  $('#videoEmpty').classList.toggle('hidden', has);
+  $('#videoPlayer').classList.toggle('hidden', !has);
+  if (!has) return;
+  if (!state.video.slides.length) state.video.slides = flattenSlides();
+  state.video.idx = Math.min(state.video.idx, state.video.slides.length - 1);
+  renderSlide();
+}
+
+function renderSlide() {
+  const v = state.video, s = v.slides[v.idx];
+  if (!s) return;
+  $('#vTitle').textContent = s.title;
+  $('#vPageTag').textContent = `لاپەڕەی ${s.page}${s.pageTitle ? ' · ' + s.pageTitle : ''}`;
+  $('#vPoints').innerHTML = s.points.map(p => `<li>${esc(p)}</li>`).join('');
+  $('#vNarr').textContent = s.narration;
+  $('#vCounter').textContent = `${v.idx + 1} / ${v.slides.length}`;
+  $('#vBar').style.width = `${((v.idx + 1) / v.slides.length) * 100}%`;
+  const img = state.pages[s.page - 1];
+  $('#vImg').src = img ? img.url : '';
+  $('#vImg').style.display = img ? 'block' : 'none';
+  $('#vNoImg').style.display = img ? 'none' : 'flex';
+  $('#vPlay').textContent = v.playing ? '⏸' : '▶️';
+  const el = $('#vScene');
+  el.classList.remove('anim'); void el.offsetWidth; el.classList.add('anim');
+}
+
+function pickVoice() {
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v => /^(ckb|ku)/i.test(v.lang)) || vs.find(v => /^ar/i.test(v.lang)) || vs.find(v => /^fa/i.test(v.lang)) || null;
+}
+
+function speakCurrent() {
+  const v = state.video, s = v.slides[v.idx];
+  if (!s) return;
+  clearTimeout(v.timeout);
+  const token = ++v.token;
+  renderSlide();
+
+  const next = () => {
+    clearTimeout(state.video.timeout);
+    if (token !== state.video.token || !state.video.playing) return;
+    if (state.video.idx < state.video.slides.length - 1) { state.video.idx++; speakCurrent(); }
+    else { state.video.playing = false; renderSlide(); toast('ڤیدیۆکە تەواو بوو 🎉', 'ok'); }
+  };
+
+  const text = s.narration || s.title;
+  if (!hasTTS || !text) { v.timeout = setTimeout(next, Math.max(4000, text.length * 90)); return; }
+
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = v.rate || 1;
+  const voice = pickVoice();
+  if (voice) { u.voice = voice; u.lang = voice.lang; } else u.lang = 'ckb';
+  u.onend = next;
+  u.onerror = e => { if (e.error !== 'interrupted' && e.error !== 'canceled') next(); };
+  v.timeout = setTimeout(next, text.length * 120 + 5000); // پاشەکەوت: ئەگەر onend نەهات
+  speechSynthesis.speak(u);
+}
+
+function togglePlay() {
+  const v = state.video;
+  if (!v.slides.length) return;
+  if (v.playing) {
+    v.playing = false;
+    if (hasTTS) speechSynthesis.pause();
+    clearTimeout(v.timeout);
+  } else {
+    v.playing = true;
+    if (hasTTS && speechSynthesis.paused) speechSynthesis.resume();
+    else speakCurrent();
+  }
+  renderSlide();
+}
+
+function stopVideo() {
+  const v = state.video;
+  v.playing = false;
+  v.token++;
+  clearTimeout(v.timeout);
+  if (hasTTS) speechSynthesis.cancel();
+}
+
+function goSlide(d) {
+  const v = state.video, ni = v.idx + d;
+  if (ni < 0 || ni >= v.slides.length) return;
+  v.idx = ni;
+  v.token++;
+  clearTimeout(v.timeout);
+  if (hasTTS) speechSynthesis.cancel();
+  if (v.playing) speakCurrent(); else renderSlide();
+}
+
+async function regenVideo() {
+  if (!state.pages.length) return toast('وێنەکان لە بیرگە نین. دووبارە ئەپلۆدیان بکە', 'error');
+  if (!state.settings.apiKey) { openSettings(); return toast('کلیلی API دابنێ', 'error'); }
+  loading(true, 'شەرحی ڤیدیۆ دروست دەکرێت...');
+  try {
+    state.lessons = await makeLessons();
+    store.set('ai_lessons', state.lessons);
+    resetVideo();
+    renderVideoView();
+    toast('شەرحی نوێ ئامادەیە ✔', 'ok');
+  } catch (err) { toast(err.message, 'error'); }
+  loading(false);
+}
+
+$('#vPlay').onclick = togglePlay;
+$('#vNext').onclick = () => goSlide(1);
+$('#vPrev').onclick = () => goSlide(-1);
+$('#vRegen').onclick = regenVideo;
+$('#vRate').onchange = e => { state.video.rate = +e.target.value; };
+
+/* ---------- Page viewer ---------- */
+function openPage(n) {
+  const p = state.pages[n - 1];
+  if (!p) return toast(`وێنەی لاپەڕەی ${n} لەم گەڕانەوەیەدا نییە. دووبارە ئەپلۆدی بکە.`, 'error');
+  $('#pageImg').src = p.url;
+  $('#pageNum').textContent = `لاپەڕەی ${n}`;
+  openModal('pageModal');
+}
+
+/* ---------- History ---------- */
+function addHistory(h) {
+  const list = store.get('ai_history', []);
+  list.unshift({ ...h, user: state.user?.name || 'میوان' });
+  store.set('ai_history', list.slice(0, 100));
+}
+
+function renderHistory() {
+  const list = store.get('ai_history', []);
+  $('#historyList').innerHTML = list.length
+    ? list.map(h => `
+      <div class="hist">
+        <div><b>${esc(h.type)}</b> · ${esc(h.user)}<br><small class="muted">${new Date(h.date).toLocaleString()}</small></div>
+        <div class="hist-score">${h.score}/${h.total}</div>
+      </div>`).join('')
+    : '<p class="muted">هێشتا هیچ ئەنجامێک نییە.</p>';
+}
+
+/* ---------- Settings ---------- */
+function openSettings() {
+  $('#setKey').value = state.settings.apiKey || '';
+  $('#setModel').value = state.settings.model || CONFIG.DEFAULT_MODEL;
+  openModal('settingsModal');
+}
+$('#btnSettings').onclick = openSettings;
+$('#btnSaveSettings').onclick = () => {
+  state.settings.apiKey = $('#setKey').value.trim();
+  state.settings.model = $('#setModel').value.trim() || CONFIG.DEFAULT_MODEL;
+  store.set('ai_settings', state.settings);
+  closeModal('settingsModal');
+  toast('پاشەکەوت کرا ✔', 'ok');
+};
+
+/* ---------- Auth (Google / Apple) ---------- */
+function decodeJwt(t) {
+  const b = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(decodeURIComponent(atob(b).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+}
+
+function setUser(u) {
+  state.user = u;
+  store.set('ai_user', u);
+  updateUserUI();
+  closeModal('loginModal');
+  toast(`بەخێربێیت ${u.name} 👋`, 'ok');
+}
+
+function updateUserUI() {
+  $('#btnUser').textContent = state.user ? `👤 ${state.user.name}` : 'چوونەژوورەوە';
+}
+
+$('#btnUser').onclick = () => {
+  if (state.user) {
+    if (confirm('دەتەوێت چوونەدەرەوە بکەیت؟')) {
+      state.user = null; store.set('ai_user', null); updateUserUI(); toast('چوویتە دەرەوە');
+    }
+  } else openLogin();
+};
+
+function openLogin(title) {
+  $('#loginTitle').textContent = title || 'چوونەژوورەوە';
+  openModal('loginModal');
+  renderGoogleBtn();
+}
+
+function renderGoogleBtn() {
+  const box = $('#gBtn');
+  box.innerHTML = '';
+  if (!CONFIG.GOOGLE_CLIENT_ID) { box.innerHTML = '<small class="muted">ئایدی گوگل دانەنراوە (بڕوانە CONFIG لە کۆدەکەدا)</small>'; return; }
+  if (!window.google?.accounts?.id) { box.innerHTML = '<small class="muted">چاوەڕێ بە، تۆڕەکە بار دەبێت...</small>'; return; }
+  google.accounts.id.initialize({ client_id: CONFIG.GOOGLE_CLIENT_ID, callback: onGoogle });
+  google.accounts.id.renderButton(box, { theme: 'filled_black', size: 'large', shape: 'pill', text: 'continue_with', width: 280 });
+}
+
+function onGoogle(resp) {
+  const p = decodeJwt(resp.credential);
+  setUser({ name: p.name || 'بەکارهێنەر', email: p.email || '', picture: p.picture || '', provider: 'Google' });
+}
+
+function loginApple() {
+  if (!CONFIG.APPLE_CLIENT_ID) return toast('ئەپل ئایدی دانەنراوە (بڕوانە CONFIG)', 'error');
+  if (!window.AppleID) return toast('تۆڕەکەی ئەپل بار نەبووە', 'error');
+  AppleID.auth.init({ clientId: CONFIG.APPLE_CLIENT_ID, scope: 'name email', redirectURI: CONFIG.APPLE_REDIRECT_URI, usePopup: true });
+  AppleID.auth.signIn().then(res => {
+    const p = decodeJwt(res.authorization.id_token);
+    const n = res.user?.name ? `${res.user.name.firstName || ''} ${res.user.name.lastName || ''}`.trim() : '';
+    setUser({ name: n || p.email || 'بەکارهێنەری Apple', email: p.email || '', provider: 'Apple' });
+  }).catch(() => toast('چوونەژوورەوە سەرکەوتوو نەبوو', 'error'));
+}
+$('#aBtn').onclick = loginApple;
+
+/* ---------- Keyboard (کویز) ---------- */
+document.addEventListener('keydown', e => {
+  if ($$('.modal:not(.hidden)').length) return;
+  if (!$('#view-quiz').classList.contains('active') || $('#quizBox').classList.contains('hidden')) return;
+  if (['1', '2', '3', '4'].includes(e.key)) answerQuiz(+e.key - 1);
+  if (e.key === 'Enter' && !$('#qNext').disabled) $('#qNext').click();
+});
+
+/* ---------- Init ---------- */
+function init() {
+  $$('.nav-btn').forEach(b => b.onclick = () => showView(b.dataset.view));
+  $$('[data-goto]').forEach(b => b.onclick = () => showView(b.dataset.goto));
+  $$('[data-close]').forEach(b => b.onclick = () => closeModal(b.dataset.close));
+  $$('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.add('hidden'); }));
+  renderThumbs();
+  updateUserUI();
+  renderQuiz();
+  renderExam();
+}
+init();
+</script>
+</body>
+</html>
