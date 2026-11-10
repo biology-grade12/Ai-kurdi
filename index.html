@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Akar AI · ئاکار</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E✦%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{
+  --bg:#060810;--panel:rgba(16,20,34,.72);--glass:rgba(255,255,255,.05);
+  --line:rgba(255,255,255,.09);--txt:#e9edf7;--mute:#8b95ab;
+  --c1:#22d3ee;--c2:#8b5cf6;--c3:#f472b6;--ok:#34d399;--err:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Vazirmatn',Tahoma,sans-serif;background:var(--bg);color:var(--txt);overflow:hidden;font-size:15px}
+body::before{content:"";position:fixed;inset:0;z-index:-1;
+  background:radial-gradient(900px 600px at 10% -10%,rgba(139,92,246,.28),transparent 60%),
+  radial-gradient(800px 600px at 110% 110%,rgba(34,211,238,.18),transparent 60%),
+  radial-gradient(600px 500px at 50% 50%,rgba(244,114,182,.06),transparent 70%)}
+button,input,textarea,select{font-family:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.hide{display:none!important}
+.ltr{direction:ltr;text-align:left}
+.glass{background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:20px}
+.grad-text{background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.mark{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:1.4rem;color:#06101a;background:linear-gradient(135deg,var(--c1),var(--c2),var(--c3));box-shadow:0 10px 30px -10px var(--c2);flex:none}
+.mark.big{width:80px;height:80px;font-size:2.4rem;border-radius:24px}
+.btn{padding:11px 18px;border-radius:12px;font-weight:600;transition:.2s;background:linear-gradient(135deg,var(--c1),var(--c2));color:#06101a;box-shadow:0 8px 24px -8px rgba(139,92,246,.7)}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.ghost{background:var(--glass);color:var(--txt);border:1px solid var(--line);box-shadow:none}
+.btn.danger{background:rgba(248,113,113,.15);color:var(--err);border:1px solid rgba(248,113,113,.3);box-shadow:none}
+.btn.wide{width:100%}
+.btn.apple{background:#fff;color:#000}
+input,textarea,select{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:12px;padding:12px 14px;outline:none;transition:.2s}
+input:focus,textarea:focus,select:focus{border-color:var(--c2);box-shadow:0 0 0 3px rgba(139,92,246,.2)}
+textarea{resize:none;line-height:1.7}
+select option{background:#111527}
+.hint{font-size:.8rem;color:var(--mute)}
+.status{font-size:.85rem;color:var(--mute);min-height:1.2em}
+.bar{height:6px;border-radius:9px;background:var(--glass);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .3s}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111527;border:1px solid var(--line);padding:12px 20px;border-radius:14px;z-index:99;animation:up .3s ease;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+
+/* ---------- Login ---------- */
+.screen{min-height:100vh;display:grid;place-items:center;padding:20px;position:relative}
+.orb{position:fixed;width:520px;height:520px;border-radius:50%;top:50%;left:50%;background:conic-gradient(from 0deg,var(--c1),var(--c2),var(--c3),var(--c1));filter:blur(90px);opacity:.35;z-index:-1;transform:translate(-50%,-50%);animation:spin 18s linear infinite}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.card{width:min(440px,100%);padding:36px 28px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.card h1{font-size:2.4rem;font-weight:800}
+.sub{color:var(--mute);line-height:1.9}
+#gBtn{min-height:44px;width:100%;display:flex;justify-content:center}
+
+/* ---------- App layout ---------- */
+.app{display:grid;grid-template-columns:280px 1fr;height:100vh;gap:14px;padding:14px}
+.side{display:flex;flex-direction:column;padding:16px;gap:14px;min-height:0}
+.brand{display:flex;align-items:center;gap:12px}
+.brand b{display:block;font-size:1.15rem}
+.brand small{color:var(--mute);font-size:.75rem}
+.nav{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;color:var(--mute);transition:.2s;text-align:right}
+.nav:hover{background:var(--glass);color:var(--txt)}
+.nav.active{background:linear-gradient(90deg,rgba(34,211,238,.15),rgba(139,92,246,.2));color:var(--txt);border:1px solid rgba(139,92,246,.35)}
+.chatList{flex:1;overflow:auto;display:flex;flex-direction:column;gap:6px;min-height:0}
+.chatItem{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;color:var(--mute);text-align:right;font-size:.88rem;white-space:nowrap;overflow:hidden}
+.chatItem:hover,.chatItem.on{background:var(--glass);color:var(--txt)}
+.chatItem .del{opacity:0;color:var(--err);padding:0 4px;flex:none}
+.chatItem:hover .del{opacity:1}
+.me{display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;background:var(--glass);border:1px solid var(--line)}
+.me>div:nth-child(2){flex:1;min-width:0}
+.me b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me small{color:var(--mute);font-size:.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.av{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,var(--c2),var(--c3));font-weight:700;color:#fff;flex:none}
+.av img{width:100%;height:100%;object-fit:cover}
+.ico{width:36px;height:36px;border-radius:10px;background:var(--glass);border:1px solid var(--line);flex:none;display:grid;place-items:center}
+.main{min-width:0;min-height:0;display:flex;flex-direction:column}
+.view{flex:1;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:auto;padding:4px}
+#view-chat{overflow:hidden}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 18px;border-radius:18px}
+.top h2{font-size:1.2rem}
+
+/* ---------- Chat ---------- */
+.messages{flex:1;overflow:auto;padding:10px 6px;display:flex;flex-direction:column;gap:16px;min-height:0}
+.msg{display:flex;gap:12px;align-items:flex-start;max-width:860px;width:100%;animation:up .35s ease}
+.msg .bd{background:var(--glass);border:1px solid var(--line);padding:14px 16px;border-radius:16px;line-height:1.9;word-wrap:break-word;min-width:0;flex:1}
+.msg.user .bd{background:linear-gradient(135deg,rgba(34,211,238,.14),rgba(139,92,246,.18))}
+.cb{direction:ltr;text-align:left;margin:10px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#05070d}
+.cl{display:flex;justify-content:space-between;align-items:center;padding:6px 12px;font-size:.75rem;color:var(--mute);border-bottom:1px solid var(--line)}
+.cp{color:var(--c1);font-size:.75rem}
+.cb pre{overflow:auto}
+.cb code{display:block;padding:12px;font-family:Consolas,monospace;font-size:.85rem;white-space:pre}
+.bd code{font-family:Consolas,monospace;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:6px;direction:ltr;display:inline}
+.composer{display:flex;gap:10px;padding:10px;align-items:flex-end;border-radius:20px}
+.composer textarea{border:0;background:transparent;box-shadow:none;padding:10px;max-height:160px}
+.composer textarea:focus{box-shadow:none;border:0}
+.composer .btn{flex:none}
+.typing{display:flex;gap:5px;padding:18px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--c1);animation:bounce 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+.welcome{margin:auto;text-align:center;padding:40px 10px;display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--mute)}
+.welcome h2{font-size:1.8rem;font-weight:800}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px}
+.chip{padding:10px 14px;border-radius:999px;background:var(--glass);border:1px solid var(--line);color:var(--txt);font-size:.85rem;transition:.2s}
+.chip:hover{border-color:var(--c2)}
+
+/* ---------- Image / Video ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1.2fr;gap:14px}
+.panel{padding:18px;display:flex;flex-direction:column;gap:12px}
+.panel label{font-size:.85rem;color:var(--mute)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>div{flex:1;min-width:140px;display:flex;flex-direction:column;gap:6px}
+.imgBox{flex:1;min-height:340px;border-radius:16px;border:1px dashed var(--line);display:grid;place-items:center;color:var(--mute);overflow:hidden;background:rgba(0,0,0,.25);text-align:center;padding:10px}
+.imgBox img,#vCanvas,#vidOut{max-width:100%;max-height:60vh;border-radius:14px}
+#vCanvas{width:100%;height:auto;background:#000}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;border:1px solid var(--line);cursor:pointer;transition:.2s}
+.gallery img:hover{transform:scale(1.03)}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+/* ---------- Settings ---------- */
+.panel input{direction:ltr}
+.panel input.rtl,.panel textarea{direction:rtl}
+
+/* ---------- Animations ---------- */
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes bounce{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-4px)}}
+
+@media(max-width:860px){
+  body{overflow:auto}
+  .app{grid-template-columns:1fr;height:auto;min-height:100vh}
+  .side{max-height:none}
+  .chatList{max-height:160px}
+  .grid2{grid-template-columns:1fr}
+  #view-chat{overflow:visible}
+  .messages{min-height:50vh}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<section id="login" class="screen">
+  <div class="orb"></div>
+  <div class="card glass">
+    <div class="mark big">A</div>
+    <h1 class="grad-text">Akar AI</h1>
+    <p class="sub">ژیری دەستکردی کوردی بۆ دروستکردنی وێنە، ڤیدیۆ و وەڵامی زیرەک<br>بێ API Key · خێرا · تایبەت بە تۆ</p>
+    <div id="gBtn"></div>
+    <button class="btn wide apple" id="appleBtn">🍎 ادامە بە Apple</button>
+    <button class="btn wide ghost" id="guestBtn">بە میوان بچۆ ژوورەوە</button>
+    <p class="hint">Google و Apple پێویستیان بە Client ID هەیە (لە بەشی ڕێکخستنەکان دایبنێ)</p>
+  </div>
+</section>
+
+<!-- ============ APP ============ -->
+<div id="app" class="app hide">
+  <aside class="side glass">
+    <div class="brand">
+      <div class="mark">A</div>
+      <div><b class="grad-text">Akar AI</b><small>v1.0 · کوردی</small></div>
+    </div>
+
+    <nav style="display:flex;flex-direction:column;gap:6px">
+      <button class="nav active" data-view="chat">💬 <span>چات</span></button>
+      <button class="nav" data-view="image">🎨 <span>دروستکردنی وێنە</span></button>
+      <button class="nav" data-view="video">🎬 <span>ستۆدیۆی ڤیدیۆ</span></button>
+      <button class="nav" data-view="settings">⚙️ <span>ڕێکخستنەکان</span></button>
+    </nav>
+
+    <div class="hint" style="padding:0 4px">چاتەکانت</div>
+    <div id="chatList" class="chatList"></div>
+
+    <div class="me">
+      <div class="av" id="meAv"></div>
+      <div><b id="meName"></b><small id="meMail"></small></div>
+      <button class="ico" id="logoutBtn" title="دەرچوون">⏻</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- Chat -->
+    <section class="view" id="view-chat">
+      <header class="top glass">
+        <h2 id="chatTitle">چاتی نوێ</h2>
+        <button class="btn ghost" id="newChatBtn">+ چاتی نوێ</button>
+      </header>
+      <div id="messages" class="messages"></div>
+      <form id="chatForm" class="composer glass">
+        <textarea id="chatInput" rows="1" placeholder="پرسیارەکەت بنووسە... (Enter بنێرە، Shift+Enter دێڕی نوێ)"></textarea>
+        <button class="btn" id="sendBtn" type="submit">ناردن</button>
+      </form>
+    </section>
+
+    <!-- Image -->
+    <section class="view hide" id="view-image">
+      <header class="top glass"><h2>🎨 دروستکردنی وێنە</h2></header>
+      <div class="grid2">
+        <div class="panel glass">
+          <label>پرۆمپت (بە کوردی یان ئینگلیزی)</label>
+          <textarea id="imgPrompt" rows="5" placeholder="نموونە: شارێکی داهاتوو لە نێوان چیاکانی کوردستان، بە ڕۆژئاوابوون و ڕووناکی نیۆن"></textarea>
+          <div class="row">
+            <div><label>ستایل</label>
+              <select id="imgStyle">
+                <option value="none">بێ ستایل</option>
+                <option value="cinematic">سینەمایی</option>
+                <option value="realistic">واقیعی</option>
+                <option value="anime">ئەنیمە</option>
+                <option value="3d">3D</option>
+                <option value="kurdish">هونەری کوردی و نەتەوەیی</option>
+              </select>
+            </div>
+            <div><label>قەبارە</label>
+              <select id="imgSize">
+                <option value="1024x1024">چوارگۆشە 1:1</option>
+                <option value="1280x720">ئاسۆیی 16:9</option>
+                <option value="720x1280">ئەستوونی 9:16</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn ghost" id="enhanceBtn">✨ باشترکردنی پرۆمپت</button>
+            <button class="btn" id="genImgBtn">دروستکردن</button>
+          </div>
+          <p id="imgStatus" class="status"></p>
+        </div>
+        <div class="panel glass">
+          <div id="imgBox" class="imgBox">وێنەکە لێرە دەردەکەوێت</div>
+          <button class="btn ghost hide" id="imgDl">📥 داگرتنی وێنە</button>
+        </div>
+      </div>
+      <h3>🖼️ گالێری</h3>
+      <div id="gallery" class="gallery"></div>
+    </section>
+
+    <!-- Video -->
+    <section class="view hide" id="view-video">
+      <header class="top glass">
+        <h2>🎬 ستۆدیۆی ڤیدیۆ</h2>
+        <span class="hint">هەر فرێمێک وێنەیەکە، بە Ken Burns و Crossfade تێکەڵ دەبن</span>
+      </header>
+      <div class="grid2">
+        <div class="panel glass">
+          <label>سیناریۆ / وەسفی ڤیدیۆکە</label>
+          <textarea id="vidPrompt" rows="5" placeholder="نموونە: کچێکی کورد لە لوتکەی چیای هەورامان بە جلی نەتەوەیی، کاتی بەیانی"></textarea>
+          <div class="row">
+            <div><label>ژمارەی فرێم</label>
+              <select id="vFrames"><option>3</option><option selected>4</option><option>6</option><option>8</option></select>
+            </div>
+            <div><label>ماوەی هەر فرێم (چرکە)</label>
+              <select id="vDur"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select>
+            </div>
+          </div>
+          <button class="btn" id="genVidBtn">دروستکردنی ڤیدیۆ</button>
+          <div class="bar"><i id="vBar"></i></div>
+          <p id="vStatus" class="status"></p>
+        </div>
+        <div class="panel glass">
+          <div id="vPlaceholder" class="imgBox">ڤیدیۆکە لێرە دەردەکەوێت</div>
+          <canvas id="vCanvas" width="768" height="432" class="hide"></canvas>
+          <video id="vidOut" controls class="hide"></video>
+          <button class="btn ghost hide" id="vidDl">📥 داگرتنی ڤیدیۆ (WebM)</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section class="view hide" id="view-settings">
+      <header class="top glass"><h2>⚙️ ڕێکخستنەکان</h2></header>
+      <div class="panel glass stack">
+        <label>ناوی تۆ</label>
+        <input id="sName" placeholder="ناوت...">
+        <label>ڕەوشت و ڕۆڵی AI (System Prompt)</label>
+        <textarea id="sSystem" rows="5"></textarea>
+        <label>Google Client ID (ئارەزووی)</label>
+        <input id="sGoogle" class="ltr" placeholder="xxxx.apps.googleusercontent.com">
+        <label>Apple Services ID (ئارەزووی)</label>
+        <input id="sApple" class="ltr" placeholder="com.akar.ai.web">
+        <label>Redirect URI بۆ Apple (لە Apple Developer زیادی بکە)</label>
+        <code id="sRedirect" class="ltr hint"></code>
+        <div class="row">
+          <button class="btn" id="saveSet">پاشەکەوتکردن</button>
+          <button class="btn danger" id="clearAll">سڕینەوەی هەموو داتا</button>
+        </div>
+      </div>
+      <div class="panel glass">
+        <h3>دەربارەی Akar AI</h3>
+        <p class="hint">ئەپلیکەیشنی تاکە فایل · بێ API Key · چات، وێنە و ڤیدیۆ · هەموو داتاکان لەسەر ئامێری خۆتن (localStorage).</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const CFG = {
+  text: 'https://text.pollinations.ai/openai',
+  image: 'https://image.pollinations.ai/prompt/'
+};
+const DEFAULT_SYS = 'تۆ Akar AI یت، ژیرییەکی دەستکردی پێشکەوتووی کوردی. هەمیشە بە کوردیی سۆرانی وەڵام بدەرەوە، مەگەر بەکارهێنەر بە زمانێکی تر بنووسێت. وەڵامەکانت ڕوون، ورد و ڕێکخراو بن و لە Markdown کەڵک وەربگرە. کاتێک کۆد دەنووسیت، کۆدی تەواو و کارا بنووسە.';
+const STYLES = {
+  none: '',
+  cinematic: 'cinematic lighting, ultra detailed, 8k',
+  realistic: 'photorealistic, sharp focus, DSLR photo',
+  anime: 'anime style, vibrant colors, highly detailed',
+  '3d': '3d render, octane render, smooth shading',
+  kurdish: 'traditional Kurdish art style, Kurdistan mountains, Kurdish traditional patterns and colors, detailed'
+};
+
+/* ================= HELPERS ================= */
+const $ = s => document.querySelector(s);
+const store = {
+  get(k, d = null) { try { const v = localStorage.getItem('akar_' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { localStorage.setItem('akar_' + k, JSON.stringify(v)); },
+  del(k) { localStorage.removeItem('akar_' + k); }
+};
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); }
+function parseJwt(t) {
+  const b = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  return JSON.parse(decodeURIComponent(atob(b).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+}
+function imageUrl(prompt, w, h, seed) {
+  return `${CFG.image}${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&model=flux&nologo=true`;
+}
+function loadImg(url, cors = false) {
+  return new Promise((res, rej) => {
+    const im = new Image();
+    if (cors) im.crossOrigin = 'anonymous';
+    im.onload = () => res(im);
+    im.onerror = () => rej(new Error('وێنەیەک بار نەکرا، دووبارە هەوڵ بدەرەوە'));
+    im.src = url;
+  });
+}
+
+/* ================= STATE ================= */
+let settings = Object.assign({ name: '', system: DEFAULT_SYS, googleId: '', appleId: '' }, store.get('settings', {}));
+let user = store.get('user');
+let chats = store.get('chats', []);
+let gallery = store.get('gallery', []);
+let currentChat = null;
+let busy = false, vBusy = false, gTries = 0;
+
+/* ================= AUTH ================= */
+function initGoogle() {
+  if (!settings.googleId) { $('#gBtn').innerHTML = '<span class="hint">Google: Client ID دانەنراوە (لە ڕێکخستنەکان)</span>'; return; }
+  if (!(window.google && google.accounts)) { if (gTries++ < 30) setTimeout(initGoogle, 300); return; }
+  google.accounts.id.initialize({ client_id: settings.googleId, callback: onGoogle });
+  $('#gBtn').innerHTML = '';
+  google.accounts.id.renderButton($('#gBtn'), { theme: 'filled_black', size: 'large', shape: 'pill', width: 280, text: 'continue_with' });
+}
+function onGoogle(resp) {
+  const p = parseJwt(resp.credential);
+  loginAs({ name: p.name, email: p.email, picture: p.picture, provider: 'google' });
+}
+function loginApple() {
+  if (!settings.appleId) return toast('Apple Services ID لە ڕێکخستنەکان دابنێ');
+  if (!window.AppleID) {
+    const s = document.createElement('script');
+    s.src = 'https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js';
+    s.onload = loginApple;
+    document.head.appendChild(s);
+    return;
+  }
+  AppleID.auth.init({ clientId: settings.appleId, scope: 'name email', redirectURI: location.origin + location.pathname, usePopup: true });
+  AppleID.auth.signIn().then(r => {
+    const p = parseJwt(r.authorization.id_token);
+    const nm = r.user ? `${r.user.name?.firstName || ''} ${r.user.name?.lastName || ''}`.trim() : '';
+    loginAs({ name: nm || (p.email || 'Apple User').split('@')[0], email: p.email || '', provider: 'apple' });
+  }).catch(e => toast('Apple: ' + (e.error || e.message || 'شکستی هێنا')));
+}
+function loginAs(u) {
+  user = { name: u.name || 'میوان', email: u.email || '', picture: u.picture || '', provider: u.provider || 'guest' };
+  store.set('user', user);
+  boot();
+  toast('بەخێربێیت، ' + user.name + ' 👋');
+}
+function logout() { store.del('user'); location.reload(); }
+function renderUser() {
+  $('#meName').textContent = user.name;
+  $('#meMail').textContent = user.email || (user.provider === 'guest' ? 'میوانی ناسنەناو' : user.provider);
+  $('#meAv').innerHTML = user.picture ? `<img src="${esc(user.picture)}" alt="">` : esc((user.name || 'A')[0]);
+}
+
+/* ================= NAV ================= */
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('hide', v.id !== 'view-' + name));
+  document.querySelectorAll('.nav').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  if (name === 'settings') fillSettings();
+}
+
+/* ================= CHAT ================= */
+function saveChats() { store.set('chats', chats.slice(0, 80)); }
+function newChat() {
+  const c = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5), title: 'چاتی نوێ', messages: [] };
+  chats.unshift(c); saveChats(); return c.id;
+}
+function openChat(id) {
+  currentChat = chats.find(c => c.id === id) || chats[0] || null;
+  if (!currentChat) { openChat(newChat()); return; }
+  store.set('currentChat', currentChat.id);
+  $('#chatTitle').textContent = currentChat.title;
+  renderMessages(); renderChatList();
+}
+function deleteChat(id) {
+  if (!confirm('ئەم چاتە بسڕدرێتەوە؟')) return;
+  chats = chats.filter(c => c.id !== id); saveChats();
+  if (!chats.length) newChat();
+  openChat(currentChat && currentChat.id !== id ? currentChat.id : chats[0].id);
+}
+function renderChatList() {
+  const box = $('#chatList'); box.innerHTML = '';
+  chats.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'chatItem' + (currentChat && c.id === currentChat.id ? ' on' : '');
+    b.textContent = c.title;
+    b.onclick = () => { openChat(c.id); showView('chat'); };
+    const d = document.createElement('span');
+    d.className = 'del'; d.textContent = '✕';
+    d.onclick = e => { e.stopPropagation(); deleteChat(c.id); };
+    b.appendChild(d);
+    box.appendChild(b);
+  });
+}
+function fmt(text) {
+  const blocks = [];
+  let h = esc(text).replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+    blocks.push(`<div class="cb"><div class="cl"><span>${lang || 'code'}</span><button class="cp" onclick="copyCode(this)">کۆپی</button></div><pre><code>${code}</code></pre></div>`);
+    return `\u0000${blocks.length - 1}\u0000`;
+  });
+  h = h.replace(/`([^`\n]+)`/g, '<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+  return h.replace(/\u0000(\d+)\u0000/g, (_, i) => blocks[i]);
+}
+function copyCode(b) {
+  navigator.clipboard.writeText(b.closest('.cb').querySelector('code').textContent);
+  b.textContent = '✓ کۆپی شد';
+  setTimeout(() => b.textContent = 'کۆپی', 1200);
+}
+function bubble(role, text) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + (role === 'ai' ? 'ai' : 'user');
+  d.innerHTML = `<div class="av">${role === 'ai' ? 'A' : esc((user?.name || 'U')[0])}</div><div class="bd">${fmt(text)}</div>`;
+  return d;
+}
+function renderMessages() {
+  const box = $('#messages'); box.innerHTML = '';
+  if (!currentChat.messages.length) {
+    box.innerHTML = `<div class="welcome">
+      <div class="mark big">A</div>
+      <h2 class="grad-text">بەخێربێیت${user ? '، ' + esc(user.name) : ''}</h2>
+      <p>من Akar AI م. پرسیارێک بکە، کۆد بنووسە، یان ئایدیای وێنە و ڤیدیۆکەت بۆ دروست بکە.</p>
+      <div class="chips">
+        <button class="chip">ئایدیایەکی ڤیدیۆی کورتم بدەرێ</button>
+        <button class="chip">کۆدی HTML بۆ ماڵپەڕێکی جوان بنووسە</button>
+        <button class="chip">شیعرێکی کوردی دەربارەی ئاشتی بنووسە</button>
+      </div></div>`;
+    box.querySelectorAll('.chip').forEach(b => b.onclick = () => { $('#chatInput').value = b.textContent; sendChat(); });
+    return;
+  }
+  currentChat.messages.forEach(m => box.appendChild(bubble(m.role, m.content)));
+  box.scrollTop = box.scrollHeight;
+}
+function setBusy(v) { busy = v; $('#sendBtn').disabled = v; }
+function autoGrow() { const t = $('#chatInput'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 160) + 'px'; }
+
+async function askAI(history, system = settings.system) {
+  const messages = [{ role: 'system', content: system }, ...history.map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content }))];
+  const res = await fetch(CFG.text, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'openai', messages, seed: Math.floor(Math.random() * 1e6) })
+  });
+  if (!res.ok) throw new Error('سێرڤەر وەڵامی نەدایەوە (' + res.status + ')');
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content?.trim() || '...';
+}
+
+async function sendChat() {
+  const inp = $('#chatInput');
+  const text = inp.value.trim();
+  if (!text || busy) return;
+  inp.value = ''; autoGrow();
+  currentChat.messages.push({ role: 'user', content: text });
+  if (currentChat.title === 'چاتی نوێ') { currentChat.title = text.slice(0, 32); $('#chatTitle').textContent = currentChat.title; }
+  saveChats(); renderMessages(); renderChatList(); setBusy(true);
+
+  const typing = document.createElement('div');
+  typing.className = 'msg ai';
+  typing.innerHTML = '<div class="av">A</div><div class="bd typing"><span></span><span></span><span></span></div>';
+  $('#messages').appendChild(typing);
+  $('#messages').scrollTop = 1e9;
+
+  try {
+    const reply = await askAI(currentChat.messages.slice(-20));
+    currentChat.messages.push({ role: 'ai', content: reply });
+  } catch (e) {
+    currentChat.messages.push({ role: 'ai', content: '❌ هەڵە: ' + e.message });
+  }
+  saveChats(); typing.remove(); renderMessages(); setBusy(false);
+}
+
+/* ================= IMAGE ================= */
+function showImage(url, p) {
+  const im = new Image(); im.src = url; im.alt = p;
+  $('#imgBox').replaceChildren(im);
+  const dl = $('#imgDl'); dl.dataset.url = url; dl.classList.remove('hide');
+}
+function renderGallery() {
+  const g = $('#gallery'); g.innerHTML = '';
+  if (!gallery.length) { g.innerHTML = '<p class="hint">هێشتا هیچ وێنەیەک دروست نەکراوە</p>'; return; }
+  gallery.forEach(it => {
+    const im = new Image();
+    im.src = it.url; im.title = it.p; im.alt = it.p; im.loading = 'lazy';
+    im.onclick = () => showImage(it.url, it.p);
+    g.appendChild(im);
+  });
+}
+async function genImage() {
+  const p = $('#imgPrompt').value.trim();
+  if (!p) return toast('تکایە پرۆمپت بنووسە');
+  const [w, h] = $('#imgSize').value.split('x').map(Number);
+  const st = STYLES[$('#imgStyle').value];
+  const url = imageUrl(st ? `${p}, ${st}` : p, w, h, Math.floor(Math.random() * 1e6));
+  const btn = $('#genImgBtn'); btn.disabled = true;
+  $('#imgStatus').textContent = '⏳ وێنە دروست دەکرێت... چەند چرکەیەک دەخایەنێت';
+  try {
+    await loadImg(url);
+    showImage(url, p);
+    gallery.unshift({ url, p }); gallery = gallery.slice(0, 24);
+    store.set('gallery', gallery); renderGallery();
+    $('#imgStatus').textContent = '✅ تەواو بوو';
+  } catch (e) {
+    $('#imgStatus').textContent = '❌ ' + e.message;
+  } finally { btn.disabled = false; }
+}
+async function enhance() {
+  const p = $('#imgPrompt').value.trim();
+  if (!p) return toast('سەرەتا پرۆمپتێک بنووسە');
+  const btn = $('#enhanceBtn'); btn.disabled = true; btn.textContent = '...';
+  try {
+    const r = await askAI([{ role: 'user', content: p }],
+      'You are an expert prompt engineer for AI image generation. Turn the user idea into ONE vivid English prompt of at most 60 words, including lighting, composition, style and mood. Output only the prompt text, nothing else.');
+    $('#imgPrompt').value = r.replace(/^["'`]+|["'`]+$/g, '');
+  } catch (e) { toast('❌ ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = '✨ باشترکردنی پرۆمپت'; }
+}
+
+/* ================= VIDEO ================= */
+function vStatus(t, pct) { $('#vStatus').textContent = t; if (pct != null) $('#vBar').style.width = pct + '%'; }
+function paint(ctx, img, W, H, scale, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(W / 2, H / 2);
+  ctx.scale(scale, scale);
+  ctx.drawImage(img, -W / 2, -H / 2, W, H);
+  ctx.restore();
+}
+function recordFrames(frames, D, W, H) {
+  return new Promise((resolve, reject) => {
+    if (!window.MediaRecorder) return reject(new Error('مرۆڤێرەکەت تۆمارکردنی ڤیدیۆ پشتگیری ناکات'));
+    const cv = $('#vCanvas'); cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+    const rec = new MediaRecorder(cv.captureStream(30), { mimeType: mime });
+    const chunks = [];
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => resolve(new Blob(chunks, { type: 'video/webm' }));
+    rec.onerror = e => reject(e.error || new Error('تۆمارکردن شکستی هێنا'));
+
+    const total = frames.length * D;
+    const t0 = performance.now();
+    rec.start(100);
+    const draw = now => {
+      const t = Math.max(0, now - t0);
+      const i = Math.min(Math.floor(t / D), frames.length - 1);
+      const local = Math.min((t - i * D) / D, 1);
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      paint(ctx, frames[i], W, H, 1 + 0.06 * local, 1);
+      if (local > 0.8 && i + 1 < frames.length) paint(ctx, frames[i + 1], W, H, 1, (local - 0.8) / 0.2);
+      if (t < total) requestAnimationFrame(draw);
+      else setTimeout(() => rec.stop(), 200);
+    };
+    requestAnimationFrame(draw);
+  });
+}
+async function genVideo() {
+  if (vBusy) return;
+  const p = $('#vidPrompt').value.trim();
+  if (!p) return toast('تکایە وەسفی ڤیدیۆکە بنووسە');
+  const N = +$('#vFrames').value, D = +$('#vDur').value * 1000, W = 768, H = 432;
+  const seed = Math.floor(Math.random() * 1e6);
+  vBusy = true; $('#genVidBtn').disabled = true;
+  $('#vidOut').classList.add('hide'); $('#vidDl').classList.add('hide');
+  try {
+    const frames = [];
+    for (let i = 0; i < N; i++) {
+      vStatus(`فرێمی ${i + 1} لە ${N} دروست دەکرێت...`, (i / N) * 80);
+      frames.push(await loadImg(imageUrl(`${p}, scene ${i + 1} of ${N}, cinematic, consistent characters and style`, W, H, seed), true));
+    }
+    vStatus('ڤیدیۆکە تۆمار دەکرێت...', 90);
+    $('#vPlaceholder').classList.add('hide');
+    $('#vCanvas').classList.remove('hide');
+    const blob = await recordFrames(frames, D, W, H);
+    const url = URL.createObjectURL(blob);
+    const v = $('#vidOut'); v.src = url; v.classList.remove('hide');
+    const dl = $('#vidDl'); dl.dataset.url = url; dl.classList.remove('hide');
+    vStatus('ڤیدیۆکە ئامادەیە ✅', 100);
+  } catch (e) {
+    vStatus('❌ ' + e.message, 0);
+  } finally { vBusy = false; $('#genVidBtn').disabled = false; }
+}
+
+/* ================= SETTINGS ================= */
+function fillSettings() {
+  $('#sName').value = settings.name;
+  $('#sSystem').value = settings.system;
+  $('#sGoogle').value = settings.googleId;
+  $('#sApple').value = settings.appleId;
+  $('#sRedirect').textContent = location.origin + location.pathname;
+}
+function saveSettings() {
+  settings = {
+    name: $('#sName').value.trim(),
+    system: $('#sSystem').value.trim() || DEFAULT_SYS,
+    googleId: $('#sGoogle').value.trim(),
+    appleId: $('#sApple').value.trim()
+  };
+  store.set('settings', settings);
+  if (user && settings.name) { user.name = settings.name; store.set('user', user); renderUser(); }
+  toast('✅ ڕێکخستنەکان پاشەکەوت کران');
+}
+function clearAll() {
+  if (!confirm('هەموو چاتەکان و گالێری دەسڕێنەوە؟')) return;
+  chats = []; gallery = [];
+  store.del('chats'); store.del('gallery'); store.del('currentChat');
+  openChat(newChat()); renderGallery();
+  toast('داتاکان سڕانەوە');
+}
+
+/* ================= BOOT ================= */
+function boot() {
+  if (user) {
+    $('#login').classList.add('hide');
+    $('#app').classList.remove('hide');
+    renderUser(); renderGallery();
+    openChat(store.get('currentChat'));
+    showView('chat');
+  } else {
+    $('#app').classList.add('hide');
+    $('#login').classList.remove('hide');
+    initGoogle();
+  }
+}
+
+document.querySelectorAll('.nav').forEach(b => b.onclick = () => showView(b.dataset.view));
+$('#guestBtn').onclick = () => loginAs({ provider: 'guest', name: 'میوان' });
+$('#appleBtn').onclick = loginApple;
+$('#logoutBtn').onclick = logout;
+$('#newChatBtn').onclick = () => { openChat(newChat()); showView('chat'); };
+$('#chatForm').onsubmit = e => { e.preventDefault(); sendChat(); };
+$('#chatInput').oninput = autoGrow;
+$('#chatInput').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); } };
+$('#genImgBtn').onclick = genImage;
+$('#enhanceBtn').onclick = enhance;
+$('#imgDl').onclick = async () => {
+  const u = $('#imgDl').dataset.url;
+  try {
+    const b = await (await fetch(u)).blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = 'akar-ai-image.jpg'; a.click();
+  } catch { window.open(u, '_blank'); }
+};
+$('#genVidBtn').onclick = genVideo;
+$('#vidDl').onclick = () => {
+  const a = document.createElement('a');
+  a.href = $('#vidDl').dataset.url; a.download = 'akar-ai-video.webm'; a.click();
+};
+$('#saveSet').onclick = saveSettings;
+$('#clearAll').onclick = clearAll;
+
+boot();
+</script>
+</body>
+</html>
