@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Poppins:wght@100..900&family=Fira+Code:wght@300..700&family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link id="theme-fonts" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @import "tailwindcss";
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-tertiary: var(--tertiary);
+        --color-tertiary-foreground: var(--tertiary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-destructive-foreground: var(--destructive-foreground);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --font-family-sans: var(--font-sans);
+        --font-family-heading: var(--font-heading);
+        --font-family-mono: var(--font-mono);
+        /* Tailwind v4's font namespace is --font-*, NOT --font-family-*.
+         *
+         * Without this line the font-heading utility does not exist at all,
+         * so every h1–h6 the design prompt mandates (font-heading) silently
+         * inherited the body's font-sans. A user could set --font-heading a
+         * dozen times, watch the tool report success, and never see the
+         * typeface change — the "font applied but not reflected" report.
+         *
+         * font-sans and font-mono are Tailwind built-ins and already read
+         * :root, which is why only headings were broken. The fallback chain
+         * keeps themes that never set a heading font rendering the body face
+         * instead of nothing. */
+        --font-heading: var(--font-heading, var(--font-sans, ui-sans-serif, system-ui, sans-serif));
+      }
+
+      /* Every filled surface carries its own text colour.
+       *
+       * Without this, <div class="bg-accent"> inherits --foreground from
+       * <html> — a colour chosen to contrast the PAGE, not the accent fill. On
+       * a dark theme with a bright accent that renders near-white text on
+       * near-white (or near-black on near-black): the invisible text users
+       * report. Pairing each fill with its own foreground makes the readable
+       * result the default instead of something the model has to remember.
+       *
+       * These sit in @layer base deliberately. Any explicit text-* utility is
+       * in @layer utilities and therefore still wins, so an intentional colour
+       * choice is never overridden. The neutral surfaces (background, muted)
+       * are left out: --foreground is already guaranteed readable on those, and
+       * forcing --muted-foreground would wash out headings in muted panels.
+       */
+      @layer base {
+        .bg-card { color: var(--card-foreground); }
+        .bg-popover { color: var(--popover-foreground, var(--card-foreground)); }
+        .bg-primary { color: var(--primary-foreground); }
+        .bg-secondary { color: var(--secondary-foreground); }
+        .bg-accent { color: var(--accent-foreground, var(--foreground)); }
+        .bg-tertiary { color: var(--tertiary-foreground, var(--primary-foreground)); }
+        .bg-destructive { color: var(--destructive-foreground, var(--primary-foreground)); }
+      }
+      :root {
+        --background: #f7fafc;
+        --foreground: #101a33;
+        --primary: #101a33;
+        --primary-foreground: #ffffff;
+        --secondary: #e9edf0;
+        --secondary-foreground: #101a33;
+        --tertiary: #2b6cb0;
+        --muted: #e9edf0;
+        --muted-foreground: #656B79;
+        --accent: #2b6cb0;
+        --destructive: #ef4444;
+        --card: #fdfdfd;
+        --card-foreground: #101a33;
+        --border: #dcd5c4;
+        --input: #dcd5c4;
+        --ring: #101a33;
+        --radius: 16px;
+        --font-sans: Inter, sans-serif;
+        --font-heading: Inter, sans-serif;
+        --font-mono: JetBrains Mono, monospace;
+        --shadow-offset-x: 0;
+        --shadow-offset-y: 10;
+        --shadow-blur: 30;
+        --shadow-spread: -8;
+        --shadow-color: rgba(15, 23, 42, 0.12);
+        --accent-foreground: #DBECFF;
+        --tertiary-foreground: #DBECFF;
+        --destructive-foreground: #101A33;
+        --primary-text: #101A33;
+        --secondary-text: #707476;
+        --tertiary-text: #2B6CB0;
+        --accent-text: #2B6CB0;
+        --destructive-text: #DB2E33;
+        }
+    </style>
+    <style>
+      .brand-gradient { background-image: linear-gradient(135deg, var(--primary), var(--accent)); }
+      .shadow-theme {
+        box-shadow:
+          calc(var(--shadow-offset-x, 0) * 1px) calc(var(--shadow-offset-y, 10) * 1px)
+          calc(var(--shadow-blur, 30) * 1px) calc(var(--shadow-spread, -8) * 1px)
+          var(--shadow-color, rgba(15, 23, 42, 0.12));
+      }
+
+      /* Brand colours used as TEXT resolve to a legibility-adjusted variant.
+       *
+       * --primary and friends are tuned to look right as FILLS; painted as text
+       * on the page they are routinely too light — a #16A34A "+8.4%" on a white
+       * card measures 3.3:1. The --*-text tokens are the same hue and chroma
+       * with lightness nudged just far enough to clear AA on the page and card
+       * surfaces, so fills keep the exact brand colour while text becomes
+       * readable.
+       *
+       * This block is intentionally UNLAYERED: unlayered declarations outrank
+       * every cascade layer, so these beat Tailwind's own text-* utilities. The
+       * var() fallbacks leave documents that predate the derived tokens
+       * rendering exactly as before.
+       */
+      .text-primary { color: var(--primary-text, var(--primary)); }
+      .text-secondary { color: var(--secondary-text, var(--secondary)); }
+      .text-tertiary { color: var(--tertiary-text, var(--tertiary)); }
+      .text-accent { color: var(--accent-text, var(--accent)); }
+      .text-destructive { color: var(--destructive-text, var(--destructive)); }
+    </style>
+  </head>
+  <body>
+<div class="min-h-screen w-full bg-background flex flex-col relative">
+<section class="bg-card text-foreground h-24 w-full">
+  <ul id="primary-menu" class="mx-auto flex h-full w-full max-w-7xl flex-wrap justify-center p-0" dir="rtl">
+    <li id="menu-item-12200" class="flex h-12 basis-1/4 items-center justify-center text-base text-muted-foreground">
+      <a href="https://student12.com/category/zansty/" class="no-underline text-card-foreground">پرسیارەکانی زانستی</a>
+    </li>
+    <li id="menu-item-12201" class="flex h-12 basis-1/4 items-center justify-center text-base text-muted-foreground">
+      <a href="https://student12.com/category/wezhayy/" class="no-underline text-card-foreground">پرسیارەکانی وێژەیی</a>
+    </li>
+    <li id="menu-item-15105" class="flex h-12 basis-1/4 items-center justify-center text-base text-muted-foreground">
+      <a href="https://student12.com/category/qestionbankenglishkrg/" class="no-underline text-card-foreground">پرسیاری وزاری خوێندنی ئینگلیزی</a>
+    </li>
+    <li id="menu-item-20905" class="flex h-12 basis-1/4 items-center justify-center text-base text-muted-foreground">
+      <a href="https://student12.com/category/wzary-bashakan/" class="no-underline text-card-foreground">جیاکراوەی بەشەکان</a>
+    </li>
+    <li id="menu-item-43259" class="flex h-12 basis-1/4 items-center justify-center text-base text-muted-foreground">
+      <a href="https://student12.com/%d9%be%d8%b1%d8%b3%db%8c%d8%a7%d8%b1%db%8c-%d9%88%d8%b2%d8%a7%d8%b1%db%8c-%d9%be%db%86%d9%84%db%8c-12-%d8%a8%db%95-pdf/" class="no-underline text-card-foreground">پرسیاری وزاری پۆلی 12 بە PDF</a>
+    </li>
+    <li id="menu-item-33242" class="flex h-12 basis-1/4 items-center justify-center text-base text-muted-foreground">
+      <a href="https://student12.com/account/" class="no-underline text-card-foreground">پرۆفایل -بەشداربوون</a>
+    </li>
+  </ul>
+</section>
+<section class="h-[200px] bg-muted text-foreground">
+  <div class="mx-auto flex h-full max-w-[1290px] items-center justify-center px-4">
+    <header>
+      <h1 class="text-center text-3xl font-normal tracking-[0.3em]" dir="rtl">پرسیارە وزاریەکان</h1>
+    </header>
+  </div>
+</section>
+<section class="bg-background text-foreground h-[355px] px-6 py-11" dir="rtl">
+  <div class="mx-auto max-w-[720px]">
+    <p class="text-right text-sm font-medium text-muted-foreground">
+      <span class="hero-cap text-foreground">ئامادەکاری بۆ تاقیکردنەوەکان</span>
+    </p>
+    <h1 data-layout="text-align:center" class="mx-auto mt-7 max-w-[680px] text-center text-3xl font-semibold leading-[1.75] text-primary md:text-4xl">
+      <span>ئەزموونی ساڵانی ڕابردووی تاقیکردنەوە وزاریەکان لە خوارەوە ببینە</span>
+    </h1>
+    <p data-layout="text-align:center" class="mx-auto mt-3 max-w-[680px] text-center text-sm leading-7 text-foreground">
+      هەموو پرسیارە وزاریەکانی ساڵانی ڕابردوو، لەگەڵ خاڵ و ڕیزبەندیت، لە یەک شوێن کۆکراونەتەوە.
+    </p>
+    <div class="quicknav mt-6 flex items-center justify-center gap-3">
+      <a href="#zansti" class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium">
+        <i class="size-3 rounded-full bg-emerald-400"></i>زانستی
+      </a>
+      <a href="#wejeyi" class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium">
+        <i class="size-3 rounded-full bg-rose-400"></i>وێژەیی
+      </a>
+      <a href="#english" class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium">
+        <i class="size-3 rounded-full bg-blue-400"></i>ئینگلیزی
+      </a>
+      <a href="#beshakan" class="inline-flex items-center gap-2 rounded-full border border-border px-5 py-2 text-sm font-medium">
+        <i class="size-3 rounded-full bg-amber-400"></i>بەشەکان
+      </a>
+    </div>
+  </div>
+</section>
+<section class="mx-auto flex h-[277px] w-full max-w-[1178px] gap-5 bg-background text-foreground" dir="rtl">
+  <div class="flex w-[530px] flex-col gap-[11px]">
+    <a href="https://student12.com/category/zansty/" class="flex h-[61px] items-center rounded-2xl border border-border border-l-4 border-l-primary bg-card px-5 text-right text-sm text-muted-foreground">
+      <span class="font-bold text-foreground">پرسیاری وزاری ١٢ی زانستی</span>
+      <span class="mr-5 text-card-foreground">وزاریەکانی بەشی زانستی</span>
+    </a>
+    <a href="https://student12.com/category/wezhayy/" class="flex h-[61px] items-center rounded-2xl border border-border border-l-4 border-l-destructive bg-card px-5 text-right text-sm text-muted-foreground">
+      <span class="font-bold text-foreground">پرسیاری وزاری ١٢ وێژەیی</span>
+      <span class="mr-5 text-card-foreground">وزاریەکانی بەشی وێژەیی</span>
+    </a>
+    <a href="https://student12.com/category/qestionbankenglishkrg/" class="flex h-[61px] items-center rounded-2xl border border-border border-l-4 border-l-primary bg-card px-5 text-right text-sm text-muted-foreground">
+      <span class="font-bold text-foreground">پرسیاری وزاری خوێندنی ئینگلیزی</span>
+      <span class="mr-5 text-card-foreground">وزاریەکانی زمانی ئینگلیزی</span>
+    </a>
+    <a href="https://student12.com/category/wzary-bashakan/" class="flex h-[61px] items-center rounded-2xl border border-border border-l-4 border-l-yellow-600 bg-card px-5 text-right text-sm text-muted-foreground">
+      <span class="font-bold text-foreground">پرسیاری وزاری جیاکراوەی بەشەکان</span>
+      <span class="mr-5 text-card-foreground">هەموو بەشەکان بەپێی پۆل</span>
+    </a>
+  </div>
+
+  <div class="flex h-[277px] flex-1 flex-col rounded-2xl bg-primary px-6 pt-[68px] text-primary-foreground" dir="rtl">
+    <div class="h-0"></div>
+    <div class="flex justify-center">
+      <a href="https://student12.com/wp-login.php?loginSocial=google&amp;redirect=https%3A%2F%2Fstudent12.com%2F" aria-label="بۆ داخڵبوون Google" class="flex h-10 w-[241px] items-center justify-between rounded-sm bg-card px-3 text-sm text-foreground shadow-sm">
+        <iconify-icon icon="logos:google-icon" class="text-xl"></iconify-icon>
+        <span>بۆ داخڵبوونGoogle</span>
+      </a>
+    </div>
+    <div class="h-[42px]"></div>
+    <div class="flex justify-between gap-3">
+      <div class="flex h-[85px] w-[285px] flex-col items-center justify-center rounded-xl border border-primary-foreground/25 bg-card/10 text-sm">
+        <div class="mb-2 h-1 w-1"></div>
+        <div>ژمارەی خاڵ:</div>
+        <div class="mt-2 text-xs text-primary-foreground/60">خاڵی کۆکراوە</div>
+      </div>
+      <div class="flex h-[85px] w-[285px] flex-col items-center justify-center rounded-xl border border-primary-foreground/25 bg-card/10 text-sm">
+        <div class="mb-2 h-1 w-1"></div>
+        <div>ڕیزبەندی: -</div>
+        <div class="mt-2 text-xs text-primary-foreground/60">لە نێو هەموو خوێندکاران</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="zansti" class="h-[778px] w-full overflow-hidden rounded-xl border border-border bg-background text-foreground">
+  <div class="h-[100px] border-b border-border px-10">
+    <div class="flex h-full items-center justify-end" dir="rtl">
+      <p></p>
+      <h3 class="text-right text-sm font-medium tracking-[0.16em]">پرسیاری وزاری پۆلی ١٢ ی زانستی</h3>
+    </div>
+  </div>
+
+  <div class="px-6 pt-[18px]">
+    <div class="border border-border bg-card p-5 shadow-sm">
+      <span class="hidden" aria-hidden="true"></span>
+      <div class="grid grid-cols-4 gap-x-4 gap-y-[15px]" dir="rtl">
+        <article class="overflow-hidden">
+          <div class="h-[250px] w-full overflow-hidden">
+            <a href="https://student12.com/2023/12/20/%d9%81%db%8c%d8%b2%db%8c%d8%a7/" target="_self">
+              <img width="300" height="188" src="https://student12.com/wp-content/uploads/2023/12/%D9%81%DB%8C%D8%B2%DB%8C%D8%A7-%D9%BE%DB%86%D9%84%DB%8C-12%DB%8C-%D8%B2%D8%A7%D9%86%D8%B3%D8%AA%DB%8C-300x188.webp" class="h-full w-full object-cover" alt="فیزیا پۆلی 12ی زانستی" sizes="(max-width: 300px) 100vw, 300px">
+            </a>
+          </div>
+          <h4 class="h-[30px] text-center text-base font-normal leading-[30px] tracking-[0.18em]"><a href="https://student12.com/2023/12/20/%d9%81%db%8c%d8%b2%db%8c%d8%a7/" target="_self">فیزیا</a></h4>
+        </article>
+
+        <article class="overflow-hidden">
+          <div class="h-[250px] w-full overflow-hidden">
+            <a href="https://student12.com/2023/12/20/%da%a9%db%8c%d9%85%db%8c%d8%a7/" target="_self">
+              <img width="300" height="214" src="https://student12.com/wp-content/uploads/2023/12/%DA%A9%DB%8C%D9%85%DB%8C%D8%A7-%D9%BE%DB%86%D9%84%DB%8C-%D9%A1%D9%A2-300x214.webp" class="h-full w-full object-cover" alt="کیمیا پۆلی ١٢" sizes="(max-width: 300px) 100vw, 300px">
+            </a>
+          </div>
+          <h4 class="h-[30px] text-center text-base font-normal leading-[30px] tracking-[0.18em]"><a href="https://student12.com/2023/12/20/%da%a9%db%8c%d9%85%db%8c%d8%a7/" target="_self">کیمیا</a></h4>
+        </article>
+
+        <article class="overflow-hidden">
+          <div class="h-[250px] w-full overflow-hidden">
+            <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%b9%db%95%d8%b1%db%95%d8%a8%db%8c/" target="_self">
+              <img width="300" height="216" src="https://student12.com/wp-content/uploads/2023/12/13754190_271334293241122_8874047209378729220_n-e1717266262200-300x216.jpg" class="h-full w-full object-cover" alt="پرسیار و وەڵامی وزاری زمانی عەرەبی" sizes="(max-width: 300px) 100vw, 300px">
+            </a>
+          </div>
+          <h4 class="h-[30px] text-center text-base font-normal leading-[30px] tracking-[0.18em]"><a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%b9%db%95%d8%b1%db%95%d8%a8%db%8c/" target="_self">زمانی عەرەبی</a></h4>
+        </article>
+
+        <article class="overflow-hidden">
+          <div class="h-[250px] w-full overflow-hidden">
+            <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self">
+              <img width="300" height="222" src="https://student12.com/wp-content/uploads/2023/12/57433626_2443625809201077_876414559517147136_n-e1717266303944-300x222.jpg" class="h-full w-full object-cover" alt="زمانی ئینگلیزی وزاری" sizes="auto, (max-width: 300px) 100vw, 300px">
+            </a>
+          </div>
+          <h4 class="h-[30px] text-center text-base font-normal leading-[30px] tracking-[0.18em]"><a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self">زمانی ئینگلیزی</a></h4>
+        </article>
+
+        <article class="overflow-hidden">
+          <div class="h-[250px] w-full overflow-hidden">
+            <a href="https://student12.com/2023/12/20/%d8%a8%d8%a7%db%8c%db%86%d9%84%db%86%d8%ac%db%8c/" target="_self">
+              <img width="300" height="187" src="https://student12.com/wp-content/uploads/2023/12/zynda-e1717266345510-300x187.webp" class="h-full w-full object-cover" alt="زیندەزانی پۆلی ١٢" sizes="auto, (max-width: 300px) 100vw, 300px">
+            </a>
+          </div>
+          <h4 class="h-[30px] text-center text-base font-normal leading-[30px] tracking-[0.18em]"><a href="https://student12.com/2023/12/20/%d8%a8%d8%a7%db%8c%db%86%d9%84%db%86%d8%ac%db%8c/" target="_self">زیندەزانی</a></h4>
+        </article>
+
+        <article class="overflow-hidden">
+          <div class="h-[250px] w-full overflow-hidden">
+            <a href="https://student12.com/2023/12/20/%d8%a8%db%8c%d8%b1%da%a9%d8%a7%d8%b1%db%8c/" target="_self">
+              <img width="300" height="161" src="https://student12.com/wp-content/uploads/2023/12/55693007_2311325345813037_6937231893758738432_n-e1717266398362-300x161.jpg" class="h-full w-full object-cover" alt="بیرکاری پۆلی 12ی زانستی" sizes="auto, (max-width: 300px) 100vw, 300px">
+            </a>
+          </div>
+          <h4 class="h-[30px] text-center text-base font-normal leading-[30px] tracking-[0.18em]"><a href="https://student12.com/2023/12/20/%d8%a8%db%8c%d8%b1%da%a9%d8%a7%d8%b1%db%8c/" target="_self">بیرکاری</a></h4>
+        </article>
+
+        <article class="overflow-hidden">
+          <div class="h-[250px] w-full overflow-hidden">
+            <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86-%d9%88-%d8%a6%db%95%d8%af%db%95%d8%a8%db%8c-%da%a9%d9%88%d8%b1%d8%af%db%8c/" target="_self">
+              <img width="225" height="300" src="https://student12.com/wp-content/uploads/2023/12/kurdi.jpg" class="h-full w-full object-cover" alt="زمان و ئەدەبی کوردی پۆلی 12" sizes="auto, (max-width: 225px) 100vw, 225px">
+            </a>
+          </div>
+          <h4 class="h-[30px] text-center text-base font-normal leading-[30px] tracking-[0.18em]"><a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86-%d9%88-%d8%a6%db%95%d8%af%db%95%d8%a8%db%8c-%da%a9%d9%88%d8%b1%d8%af%db%8c/" target="_self">زمان و ئەدەبی کوردی</a></h4>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="wejeyi" dir="rtl" class="h-[778px] overflow-hidden rounded-2xl border border-border bg-background text-foreground">
+  <div class="flex h-[101px] items-center justify-end border-b border-border px-10">
+    <div class="text-right">
+      <p></p>
+      <h3 class="text-lg font-medium tracking-widest">پرسیاری وزاری پۆلی ١٢ ی وێژەیی</h3>
+    </div>
+  </div>
+
+  <div class="mx-6 mt-[18px] h-[616px] border border-border bg-card p-5">
+    <div class="text-center shadow-sm">
+      <div>
+        <span aria-hidden="true"></span>
+        <div>
+          <div>
+            <div class="grid grid-cols-4 gap-x-4 gap-y-3">
+              <article class="min-w-0 text-center">
+                <a href="https://student12.com/2024/04/28/%d8%a8%db%8c%d8%b1%da%a9%d8%a7%d8%b1%db%8c-%d9%88%db%8e%da%98%db%95%db%8c%db%8c/" target="_self" class="block overflow-hidden">
+                  <img width="217" height="128" src="https://student12.com/wp-content/uploads/2024/04/_%D9%88%DB%8E%DA%98%DB%95%DB%8C%DB%8C-e1717266867836.jpg" class="h-[250px] w-full object-cover" alt="بیرکاری_وێژەیی">
+                </a>
+                <h4 class="mt-2 text-lg font-normal leading-none tracking-widest">
+                  <a href="https://student12.com/2024/04/28/%d8%a8%db%8c%d8%b1%da%a9%d8%a7%d8%b1%db%8c-%d9%88%db%8e%da%98%db%95%db%8c%db%8c/" target="_self">بیرکاری وێژەیی</a>
+                </h4>
+              </article>
+
+              <article class="min-w-0 text-center">
+                <a href="https://student12.com/2024/02/04/%d8%ac%d9%88%da%af%d8%b1%d8%a7%d9%81%db%8c%d8%a7/" target="_self" class="block overflow-hidden">
+                  <img width="300" height="226" src="https://student12.com/wp-content/uploads/2024/02/geo12-e1717266577608-300x226.jpg" class="h-[250px] w-full object-cover" alt="پرسیار&nbsp; و وەڵامەکانی وانەی جوگرافیای پۆلی ١٢ی وێژەیی تاقیکردنەوەکانی بەکالۆری (وزاری) ساڵانی ڕابردوو" sizes="auto, (max-width: 300px) 100vw, 300px">
+                </a>
+                <h4 class="mt-2 text-lg font-normal leading-none tracking-widest">
+                  <a href="https://student12.com/2024/02/04/%d8%ac%d9%88%da%af%d8%b1%d8%a7%d9%81%db%8c%d8%a7/" target="_self">جوگرافیا</a>
+                </h4>
+              </article>
+
+              <article class="min-w-0 text-center">
+                <a href="https://student12.com/2024/01/25/%d9%85%db%8e%da%98%d9%88%d9%88/" target="_self" class="block overflow-hidden">
+                  <img width="225" height="300" src="https://student12.com/wp-content/uploads/2024/01/mezhww12-600x800.jpg" class="h-[250px] w-full object-cover" alt="مێژوو پۆلی 12 ی وێژەیی" sizes="auto, (max-width: 225px) 100vw, 225px">
+                </a>
+                <h4 class="mt-2 text-lg font-normal leading-none tracking-widest">
+                  <a href="https://student12.com/2024/01/25/%d9%85%db%8e%da%98%d9%88%d9%88/" target="_self">مێژوو</a>
+                </h4>
+              </article>
+
+              <article class="min-w-0 text-center">
+                <a href="https://student12.com/2024/01/21/%d8%a6%d8%a7%d8%a8%d9%88%d9%88%d8%b1%db%8c/" target="_self" class="block overflow-hidden">
+                  <img width="300" height="291" src="https://student12.com/wp-content/uploads/2024/01/abwwry-e1717266057306-300x291.jpg" class="h-[250px] w-full object-cover" alt="ئابوری (ئابووری) پۆلی 12" sizes="auto, (max-width: 300px) 100vw, 300px">
+                </a>
+                <h4 class="mt-2 text-lg font-normal leading-none tracking-widest">
+                  <a href="https://student12.com/2024/01/21/%d8%a6%d8%a7%d8%a8%d9%88%d9%88%d8%b1%db%8c/" target="_self">ئابووری</a>
+                </h4>
+              </article>
+
+              <article class="min-w-0 text-center">
+                <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%b9%db%95%d8%b1%db%95%d8%a8%db%8c/" target="_self" class="block overflow-hidden">
+                  <img width="300" height="216" src="https://student12.com/wp-content/uploads/2023/12/13754190_271334293241122_8874047209378729220_n-e1717266262200-300x216.jpg" class="h-[250px] w-full object-cover" alt="پرسیار و وەڵامی وزاری زمانی عەرەبی" sizes="(max-width: 300px) 100vw, 300px">
+                </a>
+                <h4 class="mt-2 text-lg font-normal leading-none tracking-widest">
+                  <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%b9%db%95%d8%b1%db%95%d8%a8%db%8c/" target="_self">زمانی عەرەبی</a>
+                </h4>
+              </article>
+
+              <article class="min-w-0 text-center">
+                <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self" class="block overflow-hidden">
+                  <img width="300" height="222" src="https://student12.com/wp-content/uploads/2023/12/57433626_2443625809201077_876414559517147136_n-e1717266303944-300x222.jpg" class="h-[250px] w-full object-cover" alt="زمانی ئینگلیزی وزاری" sizes="auto, (max-width: 300px) 100vw, 300px">
+                </a>
+                <h4 class="mt-2 text-lg font-normal leading-none tracking-widest">
+                  <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self">زمانی ئینگلیزی</a>
+                </h4>
+              </article>
+
+              <article class="min-w-0 text-center">
+                <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86-%d9%88-%d8%a6%db%95%d8%af%db%95%d8%a8%db%8c-%da%a9%d9%88%d8%b1%d8%af%db%8c/" target="_self" class="block overflow-hidden">
+                  <img width="225" height="300" src="https://student12.com/wp-content/uploads/2023/12/kurdi.jpg" class="h-[250px] w-full object-cover" alt="زمان و ئەدەبی کوردی پۆلی 12" sizes="auto, (max-width: 225px) 100vw, 225px">
+                </a>
+                <h4 class="mt-2 text-lg font-normal leading-none tracking-widest">
+                  <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86-%d9%88-%d8%a6%db%95%d8%af%db%95%d8%a8%db%8c-%da%a9%d9%88%d8%b1%d8%af%db%8c/" target="_self">زمان و ئەدەبی کوردی</a>
+                </h4>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="english" class="h-[798px] overflow-hidden rounded-xl border border-border bg-background pt-[6px] pb-[18px] text-foreground">
+  <div class="flex h-[95px] items-center justify-end border-b border-border px-8" dir="rtl">
+    <div class="subject-head">
+      <p></p>
+      <h3 class="text-right text-[17px] font-medium">پرسیاری وزاری پۆلی ١٢ ی خوێندنی ئینگلیزی</h3>
+    </div>
+  </div>
+
+  <div class="px-6 pt-[18px]">
+    <div class="border border-border bg-card p-[19px] shadow-sm">
+      <div class="grid grid-cols-4 gap-x-[15px] gap-y-[14px]" dir="rtl">
+        <article class="text-center">
+          <a href="https://student12.com/2024/05/31/%da%a9%db%8c%d9%85%db%8c%d8%a7-%d8%ae%d9%88%db%8e%d9%86%d8%af%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self" class="block">
+            <img width="300" height="264" src="https://student12.com/wp-content/uploads/2024/05/%DA%A9%DB%8C%D9%85%DB%8C%D8%A712%D8%B2%D8%A7%D9%86%D8%B3%D8%AA%DB%8C-e1732273324621-300x264.jpg" alt="کیمیا12زانستی" class="h-[251px] w-full object-fill">
+          </a>
+          <h4 class="pt-3 text-[17px] font-medium leading-5">
+            <a href="https://student12.com/2024/05/31/%da%a9%db%8c%d9%85%db%8c%d8%a7-%d8%ae%d9%88%db%8e%d9%86%d8%af%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self">کیمیا – خوێندنی ئینگلیزی</a>
+          </h4>
+        </article>
+
+        <article class="text-center">
+          <a href="https://student12.com/2024/05/31/%d9%81%db%8c%d8%b2%db%8c%d8%a7-%d9%be%db%86%d9%84%db%8c-12-%d8%ae%d9%88%db%8e%d9%86%d8%af%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self" class="block">
+            <img width="300" height="188" src="https://student12.com/wp-content/uploads/2023/12/%D9%81%DB%8C%D8%B2%DB%8C%D8%A7-%D9%BE%DB%86%D9%84%DB%8C-12%DB%8C-%D8%B2%D8%A7%D9%86%D8%B3%D8%AA%DB%8C-300x188.webp" alt="فیزیا پۆلی 12ی زانستی" class="h-[251px] w-full object-fill">
+          </a>
+          <h4 class="pt-3 text-[17px] font-medium leading-5">
+            <a href="https://student12.com/2024/05/31/%d9%81%db%8c%d8%b2%db%8c%d8%a7-%d9%be%db%86%d9%84%db%8c-12-%d8%ae%d9%88%db%8e%d9%86%d8%af%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self">فیزیا پۆلی 12 – خوێندنی ئینگلیزی</a>
+          </h4>
+        </article>
+
+        <article class="text-center">
+          <a href="https://student12.com/2024/05/30/%d8%b2%db%8c%d9%86%d8%af%db%95%d8%b2%d8%a7%d9%86%db%8c-%d9%be%db%86%d9%84%db%8c-12-%d8%a8%db%86-%d8%ae%d9%88%db%8e%d9%86%d8%af%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self" class="block">
+            <img width="300" height="187" src="https://student12.com/wp-content/uploads/2023/12/zynda-e1717266345510-300x187.webp" alt="زیندەزانی پۆلی ١٢" class="h-[251px] w-full object-fill">
+          </a>
+          <h4 class="pt-3 text-[17px] font-medium leading-5">
+            <a href="https://student12.com/2024/05/30/%d8%b2%db%8c%d9%86%d8%af%db%95%d8%b2%d8%a7%d9%86%db%8c-%d9%be%db%86%d9%84%db%8c-12-%d8%a8%db%86-%d8%ae%d9%88%db%8e%d9%86%d8%af%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self">زیندەزانی پۆلی 12 بۆ خوێندنی ئینگلیزی</a>
+          </h4>
+        </article>
+
+        <article class="text-center">
+          <a href="https://student12.com/2024/05/30/%d8%a8%db%8c%d8%b1%da%a9%d8%a7%d8%b1%db%8c-%d9%be%db%86%d9%84%db%8c-12-%d8%ae%d9%88%db%8e%d9%86%d8%af%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self" class="block">
+            <img width="300" height="161" src="https://student12.com/wp-content/uploads/2023/12/55693007_2311325345813037_6937231893758738432_n-e1717266398362-300x161.jpg" alt="بیرکاری پۆلی 12ی زانستی" class="h-[251px] w-full object-fill">
+          </a>
+          <h4 class="pt-3 text-[17px] font-medium leading-5">
+            <a href="https://student12.com/2024/05/30/%d8%a8%db%8c%d8%b1%da%a9%d8%a7%d8%b1%db%8c-%d9%be%db%86%d9%84%db%8c-12-%d8%ae%d9%88%db%8e%d9%86%d8%af%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self">بیرکاری پۆلی 12 خوێندنی ئینگلیزی</a>
+          </h4>
+        </article>
+
+        <article class="text-center">
+          <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%b9%db%95%d8%b1%db%95%d8%a8%db%8c/" target="_self" class="block">
+            <img width="300" height="216" src="https://student12.com/wp-content/uploads/2023/12/13754190_271334293241122_8874047209378729220_n-e1717266262200-300x216.jpg" alt="پرسیار و وەڵامی وزاری زمانی عەرەبی" class="h-[251px] w-full object-fill">
+          </a>
+          <h4 class="pt-3 text-[17px] font-medium leading-5">
+            <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%b9%db%95%d8%b1%db%95%d8%a8%db%8c/" target="_self">زمانی عەرەبی</a>
+          </h4>
+        </article>
+
+        <article class="text-center">
+          <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self" class="block">
+            <img width="300" height="222" src="https://student12.com/wp-content/uploads/2023/12/57433626_2443625809201077_876414559517147136_n-e1717266303944-300x222.jpg" alt="زمانی ئینگلیزی وزاری" class="h-[251px] w-full object-fill">
+          </a>
+          <h4 class="pt-3 text-[17px] font-medium leading-5">
+            <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86%db%8c-%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c/" target="_self">زمانی ئینگلیزی</a>
+          </h4>
+        </article>
+
+        <article class="text-center">
+          <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86-%d9%88-%d8%a6%db%95%d8%af%db%95%d8%a8%db%8c-%da%a9%d9%88%d8%b1%d8%af%db%8c/" target="_self" class="block">
+            <img width="225" height="300" src="https://student12.com/wp-content/uploads/2023/12/kurdi.jpg" alt="زمان و ئەدەبی کوردی پۆلی 12" class="h-[251px] w-full object-fill">
+          </a>
+          <h4 class="pt-3 text-[17px] font-medium leading-5">
+            <a href="https://student12.com/2023/12/20/%d8%b2%d9%85%d8%a7%d9%86-%d9%88-%d8%a6%db%95%d8%af%db%95%d8%a8%db%8c-%da%a9%d9%88%d8%b1%d8%af%db%8c/" target="_self">زمان و ئەدەبی کوردی</a>
+          </h4>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="beshakan" class="h-[778px] overflow-hidden rounded-2xl border border-border bg-background px-2 pt-1.5 pb-[18px] text-foreground" dir="rtl">
+  <div class="flex h-[94px] items-center justify-start border-b border-border px-5">
+    <div class="text-right">
+      <p></p>
+      <h3 class="text-lg font-medium tracking-[0.18em]">پرسیارە وزاریەکان کە بەپێی بەشەکان جیاکراوەتەوە</h3>
+    </div>
+  </div>
+
+  <div class="px-4 pt-[18px]">
+    <div class="border border-border bg-card p-[19px]">
+      <div class="grid grid-cols-3 gap-x-[15px] gap-y-[10px]">
+        <div class="text-center">
+          <a href="https://student12.com/2025/06/21/%d8%a6%d8%a7%db%8c%db%8c%d9%86/" target="_self" class="block">
+            <img width="300" height="228" src="https://student12.com/wp-content/uploads/2025/06/AIN-768x585.jpg" class="h-[251px] w-full object-cover" alt="" sizes="auto, (max-width: 300px) 100vw, 300px">
+          </a>
+          <h4 class="mt-2 text-[17px] font-medium leading-none tracking-[0.16em]">
+            <a href="https://student12.com/2025/06/21/%d8%a6%d8%a7%db%8c%db%8c%d9%86/" target="_self">ئایین جیاکراوەی بەشەکان</a>
+          </h4>
+        </div>
+
+        <div class="text-center">
+          <a href="https://student12.com/2025/06/21/%d8%b9%db%95%d8%b1%db%95%d8%a8%db%8c%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c%d9%88%db%95%d8%ad%d8%af%db%95%da%a9%d8%a7%d9%86/" target="_self" class="block">
+            <img width="300" height="216" src="https://student12.com/wp-content/uploads/2023/12/13754190_271334293241122_8874047209378729220_n-e1717266262200-300x216.jpg" class="h-[251px] w-full object-cover" alt="پرسیار و وەڵامی وزاری زمانی عەرەبی" sizes="(max-width: 300px) 100vw, 300px">
+          </a>
+          <h4 class="mt-2 text-[17px] font-medium leading-none tracking-[0.16em]">
+            <a href="https://student12.com/2025/06/21/%d8%b9%db%95%d8%b1%db%95%d8%a8%db%8c%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c%d9%88%db%95%d8%ad%d8%af%db%95%da%a9%d8%a7%d9%86/" target="_self">عەرەبی جیاکراوەی وەحدەکان</a>
+          </h4>
+        </div>
+
+        <div class="text-center">
+          <a href="https://student12.com/2025/04/16/%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c-%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c-%d8%a8%db%95%d8%b4%db%95%da%a9%d8%a7%d9%86/" target="_self" class="block">
+            <img width="300" height="222" src="https://student12.com/wp-content/uploads/2023/12/57433626_2443625809201077_876414559517147136_n-e1717266303944-600x444.jpg" class="h-[251px] w-full object-cover" alt="زمانی ئینگلیزی وزاری" sizes="auto, (max-width: 300px) 100vw, 300px">
+          </a>
+          <h4 class="mt-2 text-[17px] font-medium leading-none tracking-[0.16em]">
+            <a href="https://student12.com/2025/04/16/%d8%a6%db%8c%d9%86%da%af%d9%84%db%8c%d8%b2%db%8c-%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c-%d8%a8%db%95%d8%b4%db%95%da%a9%d8%a7%d9%86/" target="_self">ئینگلیزی – جیاکراوەی بەشەکان</a>
+          </h4>
+        </div>
+
+        <div class="text-center">
+          <a href="https://student12.com/2025/02/24/%da%a9%d9%88%d8%b1%d8%af%db%8c-%d9%be%db%86%d9%84%db%8c-12-%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c-%d8%a8%db%95%d8%b4%db%95%da%a9%d8%a7%d9%86/" target="_self" class="block">
+            <img width="225" height="300" src="https://student12.com/wp-content/uploads/2023/12/kurdi.jpg" class="h-[251px] w-full object-cover" alt="زمان و ئەدەبی کوردی پۆلی 12" sizes="auto, (max-width: 225px) 100vw, 225px">
+          </a>
+          <h4 class="mt-2 text-[17px] font-medium leading-none tracking-[0.16em]">
+            <a href="https://student12.com/2025/02/24/%da%a9%d9%88%d8%b1%d8%af%db%8c-%d9%be%db%86%d9%84%db%8c-12-%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c-%d8%a8%db%95%d8%b4%db%95%da%a9%d8%a7%d9%86/" target="_self">کوردی پۆلی 12 – جیاکراوەی بەشەکان</a>
+          </h4>
+        </div>
+
+        <div class="text-center">
+          <a href="https://student12.com/2024/12/21/%d9%81%db%8c%d8%b2%db%8c%d8%a7-%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c-%d8%a8%db%95%d8%b4%db%95%da%a9%d8%a7%d9%86/" target="_self" class="block">
+            <img width="300" height="188" src="https://student12.com/wp-content/uploads/2023/12/%D9%81%DB%8C%D8%B2%DB%8C%D8%A7-%D9%BE%DB%86%D9%84%DB%8C-12%DB%8C-%D8%B2%D8%A7%D9%86%D8%B3%D8%AA%DB%8C-300x188.webp" class="h-[251px] w-full object-cover" alt="فیزیا پۆلی 12ی زانستی" sizes="(max-width: 300px) 100vw, 300px">
+          </a>
+          <h4 class="mt-2 text-[17px] font-medium leading-none tracking-[0.16em]">
+            <a href="https://student12.com/2024/12/21/%d9%81%db%8c%d8%b2%db%8c%d8%a7-%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c-%d8%a8%db%95%d8%b4%db%95%da%a9%d8%a7%d9%86/" target="_self">فیزیا – جیاکراوەی بەشەکان</a>
+          </h4>
+        </div>
+
+        <div class="text-center">
+          <a href="https://student12.com/2024/08/10/%d8%b2%db%8c%d9%86%d8%af%db%95%d8%b2%d8%a7%d9%86%db%8c-%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c-%d8%a8%db%95%d8%b4%db%95%da%a9%d8%a7%d9%86/" target="_self" class="block">
+            <img width="300" height="187" src="https://student12.com/wp-content/uploads/2023/12/zynda-e1717266345510-600x375.webp" class="h-[251px] w-full object-cover" alt="زیندەزانی پۆلی ١٢" sizes="auto, (max-width: 300px) 100vw, 300px">
+          </a>
+          <h4 class="mt-2 text-[17px] font-medium leading-none tracking-[0.16em]">
+            <a href="https://student12.com/2024/08/10/%d8%b2%db%8c%d9%86%d8%af%db%95%d8%b2%d8%a7%d9%86%db%8c-%d8%ac%db%8c%d8%a7%da%a9%d8%b1%d8%a7%d9%88%db%95%db%8c-%d8%a8%db%95%d8%b4%db%95%da%a9%d8%a7%d9%86/" target="_self">زیندەزانی جیاکراوەی بەشەکان</a>
+          </h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="flex h-[121px] flex-col justify-center bg-background px-6 py-8 text-foreground">
+  <div class="flex flex-col items-center">
+    <div>
+      <div>
+        <div>
+          <div>
+            <p>© 2026 Student12</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+</body></html>
